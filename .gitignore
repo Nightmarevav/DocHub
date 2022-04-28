@@ -2,8 +2,11 @@
 node_modules
 /dist
 /certs
+/.vagrant
 
 /public/workspace/*
+/public/documentation/*
+/src/components/*
 
 # local env files
 *.env*
