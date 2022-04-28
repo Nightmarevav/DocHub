@@ -35,8 +35,9 @@ Vagrant.configure("2") do |config|
   config.vm.provision :docker
   config.vm.provision :docker_compose,
      compose_version: "1.29.2",
-     env: { "PORT" => "#{portWeb}"},
-     #executable: "COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose",
+     env: { "PORT" => "#{portWeb}","COMPOSE_DOCKER_CLI_BUILD"=>1,"DOCKER_BUILDKIT"=>1},
+     #executable_symlink_path:"COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 #{executable_symlink_path }",
+     #options:{"COMPOSE_DOCKER_CLI_BUILD"=>1, "DOCKER_BUILDKIT"=>1},
      yml: ["/vagrant/docker-compose.yaml"],
      rebuild: true,
      project_name: "archdochub",
