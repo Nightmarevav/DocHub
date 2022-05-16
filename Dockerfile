@@ -18,3 +18,4 @@ EXPOSE 8080
 
 FROM ghcr.io/rabotaru/dochub/nginx:v0.0.3 as nginx
 COPY --chown=101 --from=builder /var/www/dist /usr/share/nginx/html
+EXPOSE 8079

@@ -16,9 +16,11 @@ Vagrant.configure("2") do |config|
   end
 
   portWeb = 8080
+  portPlantUML = 8079
   portDB = 27017
 
   config.vm.network(:forwarded_port, guest: portWeb, host: portWeb)
+  config.vm.network(:forwarded_port, guest: portPlantUML, host: portPlantUML)
   config.vm.network(:forwarded_port, guest: portDB, host: portDB)
   #config.vm.network :forwarded_port, guest: 22, host: 2200, id: 'ssh'
   #config.ssh.port = 2200
