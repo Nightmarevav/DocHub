@@ -1,15 +1,16 @@
 <template>
   <v-container style="min-width: 100%">
-    <h1>{{technology}}</h1>
-    <h3>{{summary.title}}</h3>
-    <div v-if="summary.aliases">Синонимы: {{summary.aliases.join('; ')}}</div>
-    <div v-if="summary.link">Сайт: <a :href="summary.link" target="_blank">{{summary.link}}</a></div>
+    <h1>{{ technology }}</h1>
+    <h3>{{ summary.title }}</h3>
+    <div v-if="summary.aliases">Синонимы: {{ summary.aliases.join('; ') }}</div>
+    <div v-if="summary.link">Сайт: <a v-bind:href="summary.link" target="_blank">{{ summary.link }}</a></div>
     <div class="summary-block">
       <div v-if="summary.components">Используется в компонентах:</div>
       <ul class="components">
-        <li class="component" v-for="component in summary.components" :key="component.id">
+        <li v-for="component in summary.components" v-bind:key="component.id" class="component">
           <router-link
-              :to="`/architect/components/${component.id}`">{{component.title}}
+            v-bind:to="`/architect/components/${component.id}`">
+            {{ component.title }}
           </router-link>
         </li>
       </ul>
@@ -17,9 +18,10 @@
     <div class="summary-block">
       <div v-if="summary.components">Встречается в контекстах:</div>
       <ul class="contexts">
-        <li class="contexts" v-for="context in summary.contexts" :key="context.id">
+        <li v-for="context in summary.contexts" v-bind:key="context.id" class="contexts">
           <router-link
-              :to="`/architect/contexts/${context.id}`">{{context.title}}
+            v-bind:to="`/architect/contexts/${context.id}`">
+            {{ context.title }}
           </router-link>
         </li>
       </ul>
@@ -29,31 +31,29 @@
 
 <script>
 
-import query from "../../manifest/query";
-import jsonata from "jsonata";
-import manifest_parser from "../../manifest/manifest_parser";
+  import query from '../../manifest/query';
+  import jsonata from 'jsonata';
 
-export default {
-  name: 'TRTechniques',
-  components:{
-  },
-  mounted() {
-  },
-  methods: {},
-  computed: {
-    summary () {
-      return (jsonata(query.summaryForTechnology(this.technology))
-          .evaluate(this.$store.state.manifest[manifest_parser.MODE_AS_IS]) || [])
-    }
-  },
-  props: {
-    technology: String
-  },
-  data() {
-    return {
-    };
-  }
-};
+  export default {
+    components:{
+    },
+    props: {
+      technology: { type: String, default: '' }
+    },
+    data() {
+      return {
+      };
+    },
+    computed: {
+      summary() {
+        return (jsonata(query.summaryForTechnology(this.technology))
+          .evaluate(this.manifest) || []);
+      }
+    },
+    mounted() {
+    },
+    methods: {}
+  };
 </script>
 
 <style scoped>

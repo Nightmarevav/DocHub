@@ -76,6 +76,9 @@
         },
         goto: function(source, entity, id) {
           this.request({url: `plugin:/idea/goto`, source, entity, id});
+        },
+        download: function(content, title, description) {
+          this.request({url: `plugin:/idea/gateway/download`, content, title, description});
         }
       };      
       "API_INJECTION"

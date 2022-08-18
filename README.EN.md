@@ -80,11 +80,13 @@ Dochub is regular vuejs single page application (spa).
 
 **Requirements:**
 
-* docker >= 20
-* docker-compose >= 3.8
+* docker >= **v20**
+* docker-compose >= **v2.2.3**
 
 
 ```bash
+export DOCKER_BUILDKIT=1 # or configure in daemon.json
+export COMPOSE_DOCKER_CLI_BUILD=1
 git clone git@github.com:RabotaRu/DocHub.git
 cd DocHub
 docker-compose up --build

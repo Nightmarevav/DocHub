@@ -1,8 +1,10 @@
 .DS_Store
 node_modules
 /dist
+/vscode-dist
 /certs
 /.vagrant
+/gitlab
 
 /public/workspace/*
 /public/documentation/*
@@ -27,3 +29,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Lock files
+package-lock.json*

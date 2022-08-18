@@ -1,5 +1,5 @@
 
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 
 // const fs = require('fs');
@@ -7,28 +7,29 @@ const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin
 
 // Дефолтная конфигурация dev-сервера
 let config = {
-    runtimeCompiler: true,
-    devServer: {
-        /*
+	runtimeCompiler: true,
+	devServer: {
+		/*
         allowedHosts: [
             'dochub.rabota.space',
             'localhost'
         ],
         */
-    },
-    configureWebpack: {
-        optimization: {
-          splitChunks: false 
-        },
-        plugins: [
-            new HtmlWebpackPlugin({
-                filename: 'plugin.html', 
-                template: 'src/plugin.html', 
-                inlineSource: '.(woff(2)?|ttf|eot|svg|js|css)$'
-            }),
-            new HtmlWebpackInlineSourcePlugin()
-        ]
-      }    
+	},
+	transpileDependencies: ['vueitfy'],
+	configureWebpack: {
+		optimization: {
+			splitChunks: false 
+		},
+		plugins: [
+			new HtmlWebpackPlugin({
+				filename: 'plugin.html', 
+				template: 'src/plugin.html', 
+				inlineSource: '.(woff(2)?|ttf|eot|svg|js|css)$'
+			}),
+			new HtmlWebpackInlineSourcePlugin()
+		]
+	}    
 };
 
 // Подключает сертификаты, если они обнаружены

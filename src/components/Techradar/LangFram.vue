@@ -1,28 +1,27 @@
 <template>
   <g>
-    <circle class="ring-arc-3" cx="300" cy="300" r="300"/>
-    <circle class="ring-arc-2" cx="300" cy="300" r="260"/>
-    <circle class="ring-arc-1" cx="300" cy="300" r="200"/>
-    <circle class="ring-arc-0" cx="300" cy="300" r="110"/>
+    <circle class="ring-arc-3" cx="300" cy="300" r="300" />
+    <circle class="ring-arc-2" cx="300" cy="300" r="260" />
+    <circle class="ring-arc-1" cx="300" cy="300" r="200" />
+    <circle class="ring-arc-0" cx="300" cy="300" r="110" />
   </g>
 </template>
 
 <script>
 
-export default {
-  name: 'TRTechniques',
-  mounted() {
-  },
-  methods: {},
-  computed: {
-  },
-  props: {
-  },
-  data() {
-    return {
-    };
-  }
-};
+  export default {
+    props: {
+    },
+    data() {
+      return {
+      };
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {}
+  };
 </script>
 
 <style scoped>

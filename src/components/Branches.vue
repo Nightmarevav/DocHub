@@ -1,48 +1,59 @@
 <template>
   <v-autocomplete
-      v-model="branch"
-      :items="items"
-      :loading="isLoading"
-      :search-input.sync="search"
-      color="white"
-      hide-no-data
-      hide-selected
-      item-text="name"
-      item-value="name"
-      label="Branch"
-      placeholder="Начни вводить название branch"
-      prepend-icon="mdi-database-search"
-      return-object
-  ></v-autocomplete>
+    v-model="branch"
+    v-bind:items="items"
+    v-bind:loading="isLoading"
+    v-bind:search-input.sync="search"
+    color="white"
+    hide-no-data
+    hide-selected
+    item-text="name"
+    item-value="name"
+    label="Branch"
+    placeholder="Начни вводить название branch"
+    prepend-icon="mdi-database-search"
+    return-object />
 </template>
 
 <script>
-import GitHelper from "../helpers/gitlab";
+  import GitHelper from '../helpers/gitlab';
 
-const axios = require('axios');
+  const axios = require('axios');
 
-export default {
-  name: 'Branches',
-  mounted() {
-    this.fetchBranches();
-  },
-  watch: {
-    project() {
+  export default {
+    name: 'Branches',
+    props: {
+      project: { type: Number, default: 0 },
+      value: { type: Object, default: () => ({}) }
+    },
+    data() {
+      return {
+        isLoading: false,
+        search: null,
+        items: [],
+        branch: null
+      };
+    },
+    watch: {
+      project() {
+        this.fetchBranches();
+      },
+      branch(value) {
+        this.$emit('input', value);
+      }
+    },
+    mounted() {
       this.fetchBranches();
     },
-    branch(value) {
-      this.$emit('input', value);
-    }
-  },
-  methods: {
-    fetchBranches() {
-      this.items = [];
-      let feetch = (page) => {
-        axios({
-          method: 'get',
-          url: GitHelper.branchesListURI(this.project, page),
-          headers: {'Authorization': `Bearer ${this.$store.state.access_token}`}
-        })
+    methods: {
+      fetchBranches() {
+        this.items = [];
+        let feetch = (page) => {
+          axios({
+            method: 'get',
+            url: GitHelper.branchesListURI(this.project, page),
+            headers: {'Authorization': `Bearer ${this.$store.state.access_token}`}
+          })
             .then((response) => {
               this.items = this.items.concat(response.data);
               let next_page = response.headers['x-next-page'];
@@ -55,23 +66,11 @@ export default {
               // eslint-disable-next-line no-console
               console.error(error);
             });
-      };
-      feetch(1);
+        };
+        feetch(1);
+      }
     }
-  },
-  props: {
-    project: Number,
-    value: Object
-  },
-  data() {
-    return {
-      isLoading: false,
-      search: null,
-      items: [],
-      branch: null
-    };
-  }
-};
+  };
 </script>
 
 <style>

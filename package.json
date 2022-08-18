@@ -6,53 +6,44 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "test": "jest --watch",
     "meta-import": "node src/tools/meta/import.js"
   },
   "dependencies": {
+    "@asyncapi/web-component": "0.24.23",
     "@mdi/font": "5.9.55",
     "axios": "0.21.1",
     "dateformat": "3.0.3",
-    "jsonata": "1.8.4",
+    "jsonata": "1.8.6",
     "swagger-ui": "3.24.3",
     "vue": "2.6.11",
     "vue-code-diff": "0.0.4",
     "vue-cookie": "1.1.4",
-    "vue-markdown": "^2.2.4",
+    "vue-markdown": "2.2.4",
     "vue-router": "3.1.5",
     "vuetify": "2.2.14",
     "vuex": "3.1.2",
     "yaml": "1.10.2"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "7.18.9",
+    "@types/jest": "28.1.6",
     "@vue/cli-plugin-babel": "4.2.2",
     "@vue/cli-plugin-eslint": "4.2.2",
     "@vue/cli-service": "4.2.2",
     "babel-eslint": "10.1.0",
     "babel-loader": "8.0.6",
     "css-loader": "3.4.2",
-    "eslint": "5.16.0",
-    "eslint-plugin-vue": "5.2.3",
+    "eslint": "7.32.0",
+    "eslint-plugin-vue": "7.20.0",
     "html-webpack-inline-source-plugin": "0.0.10",
+    "jest": "28.1.3",
     "postcss-loader": "2.0.8",
     "raw-loader": "4.0.2",
     "vue-loader": "13.7.3",
     "vue-monaco": "0.3.1",
     "vue-style-loader": "3.1.2",
     "vue-template-compiler": "2.6.11"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
   },
   "postcss": {
     "plugins": {

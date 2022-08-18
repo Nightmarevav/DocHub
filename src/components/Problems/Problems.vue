@@ -1,65 +1,40 @@
 <template>
-  <div>
-    <v-container>
-      <v-tabs v-model="currentTab">
-        <v-tab v-for="tab in problems" :key="tab.title" ripple>
-          {{ tab.title }}
-        </v-tab>
-      </v-tabs>
-      <ul v-if="problems.length" style="margin-top: 16px">
-        <template v-for="problem in problems[currentTab].problems">
-          <li :key="problem.route">
-            <a v-if="problem.target === 'plugin'" @click="onGoto(problem.route)">
-              {{problem.title}}
-            </a>
-            <router-link v-else-if="!problem.target"
-                :to="problem.route">{{problem.title}}
-            </router-link>
-            <a v-else :href="problem.route" :target="problem.target">
-              {{problem.title}}
-            </a>
-          </li>
-        </template>
-      </ul>
-    </v-container>
-  </div>
+  <v-container grid-list-xl fluid>
+    <v-layout wrap>
+      <v-flex xs12 md5 d-flex>
+        <validators v-bind:subject="subject" />
+      </v-flex>
+      <v-flex xs12 md7 d-flex>
+        <problem-blank v-if="subject" v-bind:subject="subject" />
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
 
-export default {
-  name: 'Problems',
-  methods: {
-    onGoto(route) {
-      window.$PAPI.goto(route);
-    }
-  },
-  computed: {
-    problems() {
-      const tabs = {};
-      this.$store.state.problems.map((item) => {
-        !tabs[item.problem] && (tabs[item.problem] = []);
-        tabs[item.problem].push(item);
-      });
+  import Validators from './tabs/Validators.vue';
+  import ProblemBlank from './tabs/ProblemBlank.vue';
 
-      const result = [];
-      for (const tab in tabs) {
-        result.push({
-          title: tab,
-          problems: tabs[tab]
-        });
+  export default {
+    name: 'Problems',
+    components: {
+      Validators,
+      ProblemBlank
+    },
+    props: {
+      subject: { type: String, default: '' }
+    },
+    data() {
+      return {
+      };
+    },
+    methods: {
+      onGoto(route) {
+        window.$PAPI.goto(route);
       }
-      return result;
     }
-  },
-  props: {
-  },
-  data() {
-    return {
-      currentTab: 0
-    };
-  }
-};
+  };
 </script>
 
 <style scoped>

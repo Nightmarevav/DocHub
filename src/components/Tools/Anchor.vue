@@ -1,5 +1,5 @@
 <template>
-  <a :id="id" dochub-anchor></a>
+  <a v-bind:id="id" dochub-anchor />
 </template>
 
 <script>
@@ -34,20 +34,20 @@ window.addEventListener('scroll', () => {
 });
 */
 
-export default {
-  name: 'Anchor',
-  mounted() {
-  },
-  methods: {
-  },
-  props: {
-    id: String
-  },
-  data() {
-    return {
-    };
-  }
-};
+  export default {
+    name: 'Anchor',
+    props: {
+      id: { type: String, default: '' }
+    },
+    data() {
+      return {
+      };
+    },
+    mounted() {
+    },
+    methods: {
+    }
+  };
 </script>
 
 <style scoped>

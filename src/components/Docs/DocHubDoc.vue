@@ -1,69 +1,58 @@
 <template>
   <div>
-    <empty v-if="isEmpty"></empty>
-    <template v-else>
-      <swagger v-if="isContract" :document="document"></swagger>
-      <plantuml v-if="isPlantUML" :document="document"></plantuml>
-      <doc-markdown v-if="isMarkdown" :document="document"></doc-markdown>
-      <doc-table v-if="isTable" :document="document"></doc-table>
-    </template>
+    <empty v-if="isEmpty" />
+
+    <div v-else>
+      <async-api-component v-if="docType === DocTypes.ASYNCAPI" v-bind:document="document" />
+      <swagger v-if="docType === DocTypes.OPENAPI" v-bind:document="document" />
+      <plantuml v-if="docType === DocTypes.PLANTUML" v-bind:document="document" />
+      <doc-markdown v-if="docType === DocTypes.MARKDOWN" v-bind:document="document" />
+      <doc-table v-if="docType === DocTypes.TABLE" v-bind:document="document" />
+    </div>
   </div>
 </template>
 
 <script>
+  import { DocTypes } from '@/components/Docs/enums/doc-types.enum';
+  import Swagger from './DocSwagger.vue';
+  import AsyncApiComponent from '@/components/Docs/DocAsyncApi.vue';
+  import Plantuml from './DocPlantUML.vue';
+  import DocMarkdown from './DocMarkdown.vue';
+  import DocTable from './DocTable.vue';
+  import Empty from '../Controls/Empty.vue';
 
-import Swagger from "./DocSwagger";
-import Plantuml from "./DocPlantUML";
-import manifest_parser from "../../manifest/manifest_parser";
-import DocMarkdown from "./DocMarkdown";
-import DocTable from "./DocTable.vue"
-import Empty from '../Controls/Empty.vue'
-
-export default {
-  name: 'document',
-  components: {
-    Plantuml,
-    Swagger,
-    DocMarkdown,
-    DocTable,
-    Empty
-  },
-  mounted() {
-  },
-  methods: {
-  },
-  computed: {
-    isEmpty() {
-      return !this.docs[this.document];
+  export default {
+    name: 'Document',
+    components: {
+      AsyncApiComponent,
+      Plantuml,
+      Swagger,
+      DocMarkdown,
+      DocTable,
+      Empty
     },
-    docs() {
-      return (this.$store.state.manifest[manifest_parser.MODE_AS_IS] || {}).docs || {};
+    props: {
+      document: { type: String, default: '' }
     },
-    docType () {
-      return ((this.docs[this.document] || {}).type || 'unknown').toLowerCase();
+    data() {
+      return {
+        DocTypes
+      };
     },
-    isContract() {
-      return this.docType === 'openapi';
+    computed: {
+      isEmpty() {
+        return !this.docs[this.document];
+      },
+      docs() {
+        return (this.manifest).docs || {};
+      },
+      docType() {
+        return ((this.docs[this.document] || {}).type || 'unknown').toLowerCase();
+      }
     },
-    isPlantUML() {
-      return this.docType === 'plantuml';
+    mounted() {
     },
-    isMarkdown () {
-      return this.docType === 'markdown';
-    },
-    isTable () {
-      return this.docType === 'table';
+    methods: {
     }
-  },
-  props: {
-    document: String
-  },
-  data() {
-    return {};
-  }
-};
+  };
 </script>
-
-<style>
-
-</style>

@@ -10,15 +10,15 @@ const distanationFileName = path.resolve(process.env.INIT_CWD, 'manifest.yaml');
 console.log('Import file: ', sourceFileName);
 
 fs.readFile(sourceFileName, 'utf8' , (err, yaml) => {
-    if (err) {
-        // eslint-disable-next-line no-console
-        console.error(err)
-        return
-    }
+	if (err) {
+		// eslint-disable-next-line no-console
+		console.error(err);
+		return;
+	}
 
-    parser.parse(YAML.parse(yaml));
-    fs.writeFileSync(distanationFileName, YAML.stringify(parser.context));
-    for (const filename in parser.files) {
-        fs.writeFileSync(path.resolve(process.env.INIT_CWD, filename), parser.files[filename]);
-    }
-})
+	parser.parse(YAML.parse(yaml));
+	fs.writeFileSync(distanationFileName, YAML.stringify(parser.context));
+	for (const filename in parser.files) {
+		fs.writeFileSync(path.resolve(process.env.INIT_CWD, filename), parser.files[filename]);
+	}
+});
