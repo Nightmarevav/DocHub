@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.3
 FROM node:12-alpine AS deps
 WORKDIR /var/www
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN --mount=type=cache,target=/root/.npm npm install
 
 
@@ -12,8 +12,8 @@ COPY . .
 ENV NODE_ENV=production
 # RUN --mount=type=cache,target=./node_modules/.cache npm run build
 RUN npm run build
-CMD ["npm", "run", "serve"]
-EXPOSE 8080
+#CMD ["npm", "run", "serve"]
+#EXPOSE 8080
 
 
 FROM ghcr.io/rabotaru/dochub/nginx:v0.0.3 as nginx
