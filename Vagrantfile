@@ -10,9 +10,10 @@ end
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
 
-  config.vm.provider "virtualbox" do |v|
-    v.memory = 4096
-    v.cpus = 2
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
   end
 
   portWeb = 8080
@@ -25,8 +26,8 @@ Vagrant.configure("2") do |config|
   #config.vm.network :forwarded_port, guest: 22, host: 2200, id: 'ssh'
   #config.ssh.port = 2200
   
-  #config.vm.provision :shell, inline: "apt-get update"
-  config.vm.provision :shell, inline: "export DOCKER_BUILDKIT=1 # or configure in daemon.json"
+  config.vm.provision :shell, inline: "apt-get update"
+  config.vm.provision :shell, inline: "export DOCKER_BUILDKIT=1" # or configure in daemon.json
   config.vm.provision :shell, inline: "export COMPOSE_DOCKER_CLI_BUILD=1"
 
    ## Avoid plugin conflicts
@@ -34,14 +35,27 @@ Vagrant.configure("2") do |config|
     config.vbguest.auto_update = false
   end
 
-  config.vm.provision :docker
-  config.vm.provision :docker_compose,
-     compose_version: "1.29.2",
-     env: { "PORT" => "#{portWeb}","COMPOSE_DOCKER_CLI_BUILD"=>1,"DOCKER_BUILDKIT"=>1},
-     #executable_symlink_path:"COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 #{executable_symlink_path }",
-     #options:{"COMPOSE_DOCKER_CLI_BUILD"=>1, "DOCKER_BUILDKIT"=>1},
-     yml: ["/vagrant/docker-compose.yaml"],
-     rebuild: true,
-     project_name: "archdochub",
-     run: "always"
+ 
+  #install docker
+  config.vm.provision :shell, inline: "sudo curl -fsSL https://get.docker.com -o get-docker.sh"
+  config.vm.provision :shell, inline: "sudo DRY_RUN=1 sh ./get-docker.sh"
+  
+  #install docker-compose
+  config.vm.provision :shell, inline: "sudo curl -SL ""https://github.com/docker/compose/releases/download/v2.9.0/docker-compose-$(uname -s)-$(uname -m)"" -o /usr/local/bin/docker-compose"
+  config.vm.provision :shell, inline: "sudo chmod +x /usr/local/bin/docker-compose"
+
+  #config.vm.provision :docker
+  #config.vm.provision :docker_compose,
+    # compose_version: "1.29.2"
+  #  compose_version: "2.90.0"
+ 
+ 
+#     env: { "PORT" => "#{portWeb}"},
+#     #,"COMPOSE_DOCKER_CLI_BUILD"=>1,"DOCKER_BUILDKIT"=>1},
+#     #executable_symlink_path:"COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 #{executable_symlink_path }",
+#     #options:{"COMPOSE_DOCKER_CLI_BUILD"=>1, "DOCKER_BUILDKIT"=>1},
+#     yml: "/vagrant/docker-compose.yaml",
+#     rebuild: false,
+#     project_name: "archdochub",
+#     run: "always"
 end
