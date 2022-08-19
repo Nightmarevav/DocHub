@@ -17,6 +17,7 @@
     "jsonata": "1.8.6",
     "swagger-ui": "3.24.3",
     "vue": "2.6.11",
+    "core-js": "^3.23.5",
     "vue-code-diff": "0.0.4",
     "vue-cookie": "1.1.4",
     "vue-markdown": "2.2.4",

@@ -6,7 +6,7 @@ services:
     image: dochub
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       target: nginx
     # Setup variables however you want
     # environment:
