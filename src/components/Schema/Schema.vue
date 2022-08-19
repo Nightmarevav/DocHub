@@ -178,7 +178,7 @@
               notEmpty = true;
               const title = this.makeRef('component', component.id, component.title);
               // Если компонент является системой, описываем его через DSL
-              let entity = component.entity.toString();
+              let entity = (component.entity || 'component').toString();
               // todo Костыль для совместимости. Нужно будет удалить, когда все перейдут на новый синтаксис
               switch (entity) {
                 case 'system':
@@ -207,11 +207,11 @@
                 result += `\n${entity}End()\n`;
               } else {
                 if (aspectList.length || component.is_context) {
-                  result += `${component.entity} ${component.id}`;
+                  result += `${entity} ${component.id}`;
                   result += `[\n<b>${title}</b>\n====\n* ${aspectList.join('\n----\n* ')}\n`;
                   result += component.is_context ? `---\n[[/architect/contexts/${component.id} ≫≫]]\n]`: ']';
                 } else {
-                  result += `${component.entity} "<b>${title}</b>" as ${component.id}`;
+                  result += `${entity} "<b>${title}</b>" as ${component.id}`;
                 }
               }
               result += '\n';

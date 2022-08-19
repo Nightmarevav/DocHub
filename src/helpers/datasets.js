@@ -11,7 +11,8 @@ export default function() {
 		// Парсит поле данных в любом объекте
 		//      context - Контекст данных для выполнения запросов
 		//      data - данные требующие парсинга
-		parseSource(context, data) {
+		//		subject - объект - владелец
+		parseSource(context, data, subject) {
 			return new Promise((resolve, reject) => {
 				// Константные данные
 				if(typeof data === 'object') {
@@ -19,7 +20,7 @@ export default function() {
 				} else if (typeof data === 'string') {
 					// Inline запрос JSONata
 					if (/(\s+|)\(((.*|\d|\D)+?)(\)(\s+|))$/.test(data)) {
-						resolve(query.expression(data).evaluate(context));
+						resolve(query.expression(data, subject).evaluate(context));
 						// Ссылка на файл с данными
 					} else if (data.slice(-5) === '.yaml' || data.slice(-5) === '.json' || (data.search(':') > 0)) {
 						requests.request(data)
@@ -35,7 +36,7 @@ export default function() {
 							resolve(query.expression(typeof response.data === 'string' 
 								? response.data 
 								: JSON.stringify(response.data)).evaluate(context)
-							);
+							, subject);
 						}).catch((e) => reject(e));
 						// Идентификатор источника данных
 					} else {
@@ -56,14 +57,14 @@ export default function() {
 		getData(context, subject) {
 			return new Promise((resolve, reject) => {
 				const exec = (origin) => {
-					this.parseSource(origin, subject.source || (subject.data /* depricated */))
+					this.parseSource(origin, subject.source || (subject.data /* depricated */), subject)
 						.then((data) => resolve(data))
 						.catch((e) => reject(e));
 				};
 				if (subject.source || (subject.data /* depricated */) ) {
 					if (subject.origin) {
 						if(typeof subject.origin === 'string') {
-							this.parseSource(context, subject.origin)
+							this.parseSource(context, subject.origin, subject)
 								.then((data) => exec(data))
 								.catch((e) => reject(e));
 						} else if ((typeof subject.origin === 'object') && !Array.isArray(subject.origin)) {
@@ -71,7 +72,7 @@ export default function() {
 							const data = {};
 							for (const key in subject.origin) {
 								++counter;
-								this.parseSource(context, subject.origin[key]).then((content) => {
+								this.parseSource(context, subject.origin[key], subject).then((content) => {
 									data[key] = content;
 									if(!--counter) exec(data);
 								}).catch((e) => reject(e));

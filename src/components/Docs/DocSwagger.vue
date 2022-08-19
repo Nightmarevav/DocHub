@@ -2,49 +2,49 @@
   <div
     v-if="url"
     v-bind:id="id">
-    {{ error }}
+    <v-alert
+      v-bind:value="!!error"
+      type="error">
+      {{ error }}
+    </v-alert>
   </div>
 </template>
 
 <script>
   import SwaggerUI from 'swagger-ui';
-  // import config from "../../../config";
-  import docs from '../../helpers/docs';
   import requests from '../../helpers/requests';
+  import mustache from 'mustache';
+  import DocMixin from './DocMixin';
 
   export default {
     name: 'Swagger',
-    props: {
-      document: { type: String, default: '' }
-    },
+    mixins: [DocMixin],
     data() {
       return {
         id : `swagger-${Date.now()}-${Math.round(Math.random() * 10000)}`,
         data: null,
-        error: ''
+        error: null
       };
     },
-    computed: {
-      url() {
-        // eslint-disable-next-line vue/no-async-in-computed-properties
-        setTimeout(() => this.requestData(), 50);
-        const profile = this.manifest.docs ? this.manifest.docs[this.document] : null;
-        return profile ?
-          docs.urlFromProfile(profile,
-                              (this.$store.state.sources.find((item) => item.path === `/docs/${this.document}`) || {}).location
-          )
-          : '';
-      }
-    },
     methods: {
-      requestData() {
-        requests.request(this.url)
+      refresh() {
+        const params = this.isTemplate ? {
+          responseHook: (response) => {
+            if (typeof response.data === 'string')
+              response.data = mustache.render(response.data, this.source.dataset);
+            return response;
+          }
+        } : undefined;
+        requests.request(this.url, undefined, params)
           .then((response) => {
             this.data = response.data;
             this.swaggerRender();
           }).catch((e) => {
-            this.error = e;
+            this.error = `${e} [${this.url}]`;
+            // eslint-disable-next-line no-console
+            console.error(this.error);
           });
+        this.sourceRefresh();  
       },
 
       swaggerRender() {
