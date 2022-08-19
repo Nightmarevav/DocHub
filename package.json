@@ -15,6 +15,7 @@
     "axios": "0.21.1",
     "dateformat": "3.0.3",
     "jsonata": "1.8.6",
+    "mustache": "4.2.0",
     "swagger-ui": "3.24.3",
     "vue": "2.6.11",
     "vue-code-diff": "0.0.4",

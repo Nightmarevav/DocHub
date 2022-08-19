@@ -25,10 +25,11 @@
 </template>
 
 <script>
-  import docs from '@/helpers/docs';
   import requests from '@/helpers/requests';
   import markdown from 'vue-markdown';
   import DocMarkdownObject from './DocHubObject';
+  import DocMixin from './DocMixin';
+  import mustache from 'mustache';
   
   export default {
     name: 'DocMarkdown',
@@ -73,9 +74,7 @@
         }
       }
     },
-    props: {
-      document: { type: String, default: '' }
-    },
+    mixins: [DocMixin],
     data() {
       return {
         showDocument: false,
@@ -84,27 +83,14 @@
         outHTML: ''
       };
     },
-    computed: {
-      url() {
-        const profile = this.manifest.docs ? this.manifest.docs[this.document] : null;
-        return profile ?
-          docs.urlFromProfile(profile,
-                              (this.$store.state.sources.find((item) => item.path === `/docs/${this.document}`) || {}).location
-          )
-          : '';
-      }
-    },
-    watch: {
-      url() { this.refresh(); }
-    },
-    mounted() {
-      this.refresh();
-    },
     methods: {
       // eslint-disable-next-line no-unused-vars
       rendered(outHtml) {
         if (this.outHTML !== outHtml) {
-          this.outHTML = outHtml.replace(/<img /g, '<dochub-object :baseURI="baseURI" ');
+          this.outHTML = outHtml
+            .replace(/<img /g, '<dochub-object :baseURI="baseURI" ')
+            .replace(/\{\{/g, '<span v-pre>{{</span>')
+            .replace(/\}\}/g, '<span v-pre>}}</span>');
           this.showDocument = false;
           this.$nextTick(() => {
             this.showDocument = true;
@@ -124,18 +110,22 @@
         this.outHTML = '';
         this.showDocument = false;
         this.toc = '';
+        // Получаем шаблон документа
         setTimeout(() => {
-          requests.request(this.url).then((response) => {
-            // eslint-disable-next-line no-console
-            this.markdown = response.data.toString();
-            if (this.markdown.length === 0)
+          requests.request(this.url).then(({ data }) => {
+            if (!data)
               this.markdown = 'Здесь пусто :(';
+            else if (this.isTemplate) {
+              this.markdown = mustache.render(data, this.source.dataset);
+            } else
+              this.markdown = data;
           })
             .catch((e) => {
               // eslint-disable-next-line no-console
-              console.error(e, `Ошибка запроса (1) [${this.url}]`, e);
+              console.error(e, `Ошибка запроса [${this.url}]`, e);
             });
         }, 50);
+        this.sourceRefresh();
       }
     }
   };

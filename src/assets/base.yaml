@@ -32,13 +32,13 @@ rules:
         (
           $MANIFEST := $;
           $USED := $distinct(contexts.*.components);
-          [[[components.$spread().(
+          [components.$spread().(
               $ID := $keys()[0];
               {
                   "id" : $ID,
                   "mask" : $USED[$wcard($ID, $)]
               }
-          )][$not($exists(mask))]].{
+          )[$not($exists(mask))].{
             "uid": "$dh-mm-ofb-" & id,
             "correction": "Добавьте компонент в контекст",
             "description": "Предполагается, что компонент не включенный в контекст не учтен.",
