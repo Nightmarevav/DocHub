@@ -1,0 +1,19 @@
+#Докер для сборки PlantUml из официальной репы
+FROM openjdk:buster
+
+ENV LANG ru_RU.UTF-8
+ENV LC_ALL ru_RU.UTF-8
+
+RUN apt-get update 
+RUN apt-get install -y --no-install-recommends graphviz debconf locales && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen ru_RU && locale-gen ru_RU.UTF-8
+RUN dpkg-reconfigure -f noninteractive locales
+ENV ALLOW_PLANTUML_INCLUDE=true
+RUN cd /opt && wget https://github.com/plantuml/plantuml/releases/download/snapshot/plantuml-SNAPSHOT.jar
+
+EXPOSE 8080
+
+ENTRYPOINT java -Dplantuml.include.path=/opt/plantuml  -jar /opt/plantuml-SNAPSHOT.jar -picoweb:8080
