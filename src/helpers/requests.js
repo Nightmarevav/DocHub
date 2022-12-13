@@ -20,12 +20,14 @@ axios.interceptors.request.use(function(params) {
 axios.interceptors.response.use(function(response) {
 	if (response.config.responseHook) 
 		response = response.config.responseHook(response);
-	if (!response.config.raw && typeof response.data === 'string' ) {
-		const url = response.config.url.toLowerCase();
-		if ((url.indexOf('.json/raw') >= 0) || (url.slice(-5) === '.json'))
-			response.data = JSON.parse(response.data);
-		else if ((url.indexOf('.yaml/raw') >= 0) || (url.slice(-5) === '.yaml'))
-			response.data = YAML.parse(response.data);
+	if (typeof response.data === 'string') {
+		if (!response.config.raw) {
+			const url = response.config.url.split('?')[0].toLowerCase();
+			if ((url.indexOf('.json/raw') >= 0) || (url.slice(-5) === '.json'))
+				response.data = JSON.parse(response.data);
+			else if ((url.indexOf('.yaml/raw') >= 0) || (url.slice(-5) === '.yaml'))
+				response.data = YAML.parse(response.data);
+		}
 	}
 	return response;
 }, function(error) {
@@ -35,10 +37,22 @@ axios.interceptors.response.use(function(response) {
 
 if(window.$PAPI) {
 	window.$PAPI.middleware = function(response) {
-		if (response.contentType === 'yaml') {
-			response.data = YAML.parse(response.data);
-		} else if (response.contentType === 'json') {
-			response.data = JSON.parse(response.data);
+		let type = response.contentType;
+		switch(type) {
+		case 'yaml': response.data = YAML.parse(response.data); break;
+		case 'json': response.data = JSON.parse(response.data); break;
+		case 'jpg': 
+			type = 'jpeg'; 
+		// eslint-disable-next-line no-fallthrough
+		case 'jpeg':
+		case 'png':
+		case 'svg':
+			if (type === 'svg') type = 'svg+xml';
+			response.data = Buffer.from(response.data, 'base64');
+			response.headers = Object.assign(response.headers || {}, {
+				'content-type': `image/${type}`
+			});
+			break;
 		}
 		return response;
 	};
@@ -46,10 +60,12 @@ if(window.$PAPI) {
 
 export default {
 	axios,
+	isURL(url) {
+		// eslint-disable-next-line no-useless-escape
+		return url && url.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.?[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/);
+	},
 	isExtarnalURI(uri) {
-		return (uri.slice(0, window.origin.length) !== window.origin) 
-        // eslint-disable-next-line no-useless-escape
-        && uri.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/);
+		return (uri.slice(0, window.origin.length) !== window.origin) && this.isURL(uri);
 	},
 	getSourceRoot(){
 		if(window.$IDE_PLUGIN) {
@@ -170,7 +186,7 @@ export default {
 		let params = Object.assign({}, axios_params);
 		params.source = this.makeURL(uri, baseURI);
 		params.url = params.source.url.toString();
-		if (window.$IDE_PLUGIN && uri.split(':')[0] === 'plugin') {
+		if (window.$IDE_PLUGIN && params.url.split(':')[0] === 'plugin') {
 			return window.$PAPI.request(params);
 		} else {
 			return axios(params);

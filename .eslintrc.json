@@ -5,6 +5,7 @@
 		"node": true,
 		"jest": true
 	},
+	"ignorePatterns": ["**/public/libs/*.js"],
 	"extends": [
 		"eslint:recommended",
 		"plugin:vue/recommended"

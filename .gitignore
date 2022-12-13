@@ -31,4 +31,6 @@ yarn-error.log*
 *.sw?
 
 # Lock files
-package-lock.json*
+# Вызвало сбой сборки докера
+# пока вернем до прихода DevOps
+# package-lock.json*

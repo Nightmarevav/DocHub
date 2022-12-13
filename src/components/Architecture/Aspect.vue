@@ -54,6 +54,7 @@
         <tab-contexts 
           v-if="contexts.length"
           style="width: 100%"
+          v-bind:default-context="defaultContext"
           v-bind:contexts="contexts"
           d-flex />  
       </v-flex>
@@ -118,17 +119,17 @@
       components() {
         return query.expression(query.componentsForAspects(this.aspect)).evaluate(this.manifest) || [];
       },
+      defaultContext() {
+        const contextId = query.expression(query.defaultContextForAspect(this.aspect)).evaluate(this.manifest);
+
+        return contextId ? this.contexts.find(i => i.id === contextId) : null;
+      },
       contexts() {
         return query.expression(query.contextsForAspects(this.aspect)).evaluate(this.manifest) || [];
       },
       summary() {
         return (query.expression(query.summaryForAspect(this.aspect))
           .evaluate(this.manifest) || []);
-      }
-    },
-    methods: {
-      goToLink() {
-
       }
     }
   };

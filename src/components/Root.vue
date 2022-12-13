@@ -35,17 +35,11 @@
       <v-btn v-if="isPlugin" icon title="Найти в коде" v-on:click="gotoCode">
         <v-icon class="material-icons" style="display: inline">search</v-icon>
       </v-btn>
-      <v-btn v-if="isPlugin" icon title="Отладка" v-on:click="showDebugger">
-        <v-icon class="material-icons" style="display: inline">adb</v-icon>
-      </v-btn>
-      <v-btn icon title="Обновить" v-on:click="reloadForce">
-        <v-icon class="material-icons" style="display: inline">refresh</v-icon>
-      </v-btn>
       <!--
         <v-btn icon title="Стравнить">
           <v-icon>mdi-call-split</v-icon>
         </v-btn>
-        -->
+      -->
     </v-app-bar>
     <v-navigation-drawer
       v-show="!isLoading"
@@ -162,13 +156,6 @@
           }
           case 'docs': window.$PAPI.goto(null, 'document', struct[2]); break;
         }
-      },
-      reloadForce() {
-        window.$PAPI.reload();
-      },
-      showDebugger() {
-        window.$PAPI.isDebug = true;
-        window.$PAPI.showDebugger();
       }
     }
   };

@@ -35,7 +35,7 @@
 
 <script>
 
-  import Schema from '../../Schema/Schema';
+  import Schema from '@/components/Schema/Schema.vue';
   import query from '../../../manifest/query';
 
   export default {
@@ -44,11 +44,12 @@
       Schema
     },
     props: {
+      defaultContext: { type: Object, default: null },
       contexts: { type: Array, default: () => ([]) }
     },
     data() {
       return {
-        seleted : null,
+        selected : null,
         currentContext: 0
       };
     },
@@ -66,21 +67,20 @@
       },
       context: {
         get() {
-          return this.seleted ? this.seleted : (this.contexts[0]);
+          if (!this.selected) {
+            return this.defaultContext || this.contexts[0];
+          }
+
+          return this.selected;
         },
         set(value) {
-          this.seleted = value;
+          this.selected = value;
         }
       }
     },
     watch: {
       contexts() {
         this.seleted = null;
-      }
-    },
-    methods: {
-      goToLink() {
-
       }
     }
   };

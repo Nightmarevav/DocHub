@@ -132,8 +132,6 @@ export default {
 				context.commit('setIsReloading', true);
 			};
 			parser.onError = (action, data) => {
-				// eslint-disable-next-line no-debugger
-				debugger;
 				const error = data.error || {};
 				const url = (data.error.config || {url: data.uri}).url;
 				const uid = '$' + crc16(url);

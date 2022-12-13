@@ -31,10 +31,11 @@ export default {
 			return this.manifest?.docs?.[this.document] || {};
 		},
 		url() {
-			return this.profile ?
+			const result = this.profile ?
 				docs.urlFromProfile(this.profile,
 					(this.$store.state.sources.find((item) => item.path === `/docs/${this.document}`) || {}).location
 				): '';
+			return `${result}?id=${this.document}`;
 		}
 	},
 	props: {

@@ -8,3 +8,8 @@ components:
   test:
     title: test
     entity: component
+aspects:
+  test-aspect:
+    title: test-aspect
+    location: test-aspect
+    default-context: default-context
