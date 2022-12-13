@@ -1,9 +1,24 @@
 import requests from '../helpers/requests';
 import gitlab from '../helpers/gitlab';
-import jsonata from 'jsonata';
 import property from './prototype';
+import env from '../helpers/env';
 
 let touchProjects = {};
+
+// Определяет глубину лога источника для секции
+const sectionDeepLog = {
+	'forms': 0,
+	'namespaces': 0,
+	'imports': 0,
+	'aspects': 2,
+	'docs': 2,
+	'contexts': 2,
+	'components': 2,
+	'entities': 6,
+	'rules': 3,
+	'datasets': 2,
+	'$default$': 2
+};
 
 const parser = {
 	// Манифест перезагружен
@@ -95,7 +110,8 @@ const parser = {
 	},
 	// Сохраняет в карте склеивания данные
 	pushToMergeMap(path, source, location) {
-		if (path && path.split('/').length > 3) return;
+		const structPath = (path || '').split('/');
+		if (structPath.length - 1 > sectionDeepLog[structPath[1] || '$default$']) return;
 		const storePath = path || '/';
 		const found = this.mergeMap.find((element) => {
 			return ((element.path === storePath) && (element.location === location));
@@ -235,7 +251,7 @@ const parser = {
 			// Подключаем манифест самого DocHub
 			// eslint-disable-next-line no-constant-condition
 			if (
-				(process.env.VUE_APP_DOCHUB_MODE !== 'plugin') &&
+				(!env.isPlugin()) &&
                 ((process.env.VUE_APP_DOCHUB_APPEND_DOCHUB_DOCS || 'y').toLowerCase() === 'y')
 			) {
 				this.import(requests.makeURIByBaseURI('documentation/root.yaml', requests.getSourceRoot()), true);
@@ -254,15 +270,25 @@ const parser = {
 			this.manifest[mode] = this.merge(this.manifest[mode], manifest, uri);
 
 			for (const section in manifest) {
-				['forms', 'namespaces', 'aspects', 'docs', 'contexts', 'components', 'datasets'].indexOf(section) >= 0
-                && section !== 'imports'; 
-				this.parseEntity(manifest[section],`${mode}/${section}`, uri);
+				const node = manifest[section];
+				switch(section) {
+				case 'forms':
+				case 'namespaces':
+				case 'aspects':
+				case 'docs':
+				case 'contexts':
+				case 'components':
+				case 'rules':
+				case 'datasets':
+					this.parseEntity(node,`${mode}/${section}`, uri);
+					break;
+				case 'imports':
+					for (const key in node) {
+						this.import(requests.makeURIByBaseURI(node[key], uri), true);
+					}
+					break;
+				}
 			}
-
-			// Подключаем манифесты
-			(jsonata('imports').evaluate(response.data) || []).map((importUri) => {
-				this.import(requests.makeURIByBaseURI(importUri, uri), true);
-			});
 		})
 		// eslint-disable-next-line no-console
 			.catch((e) => this.registerError(e, uri))

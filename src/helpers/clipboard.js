@@ -1,3 +1,5 @@
+import env from './env';
+
 
 function fallbackCopyTextToClipboard(text) {
 	var textArea = document.createElement('textarea');
@@ -23,14 +25,18 @@ function fallbackCopyTextToClipboard(text) {
 }
 
 export default function(text)  {
-	if (!navigator.clipboard) {
-		fallbackCopyTextToClipboard(text);
-		return;
+	if (env.isPlugin()) {
+		window.$PAPI.copyToClipboard(text);
+	} else {
+		if (!navigator.clipboard) {
+			fallbackCopyTextToClipboard(text);
+			return;
+		}
+		navigator.clipboard.writeText(text).then(function() {
+		}, function(err) {
+			// eslint-disable-next-line no-console        
+			console.error('Async: Could not copy text: ', err);
+		});
 	}
-	navigator.clipboard.writeText(text).then(function() {
-	}, function(err) {
-		// eslint-disable-next-line no-console        
-		console.error('Async: Could not copy text: ', err);
-	});
 }
 

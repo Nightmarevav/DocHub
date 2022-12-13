@@ -15,7 +15,7 @@
         {{ getTitleOfItem(item) }}
       </template>
       <template v-if="item.items && expands[item.key]">
-        <tree-item v-bind:items="item.items" />
+        <tree-item v-bind:expands="expands" v-bind:items="item.items" />
       </template>
     </li>
   </ul>
@@ -46,20 +46,20 @@
         }
       }
     },
-    computed: {
-    },
     watch: {
+      state() {
+        this.$emit('input', this.state);
+      },
       items(items) {
         this.refreshExpand(items);
       }
     },
     props: {
-      items: Array
+      items: Array,
+      expands: Object
     },
     data() {
-      return {
-        expands: {}
-      };
+      return {};
     }
   };
 

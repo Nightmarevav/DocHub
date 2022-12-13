@@ -34,6 +34,7 @@
 
 <script>
 
+  import requests from '@/helpers/requests';
   import query from '../manifest/query';
 
   export default {
@@ -41,7 +42,7 @@
     data() {
       return {
         // Открытые пункты меню
-        currentRoute: window.location.pathname,
+        currentRoute: this.$router.currentRoute.fullPath,
         expands: {
           architect: true,
           docs: true
@@ -121,7 +122,7 @@
     },
     watch: {
       $route(to) {
-        this.currentRoute = to.path;
+        this.currentRoute = to.fullPath;
       }
     },
     mounted() {
@@ -136,7 +137,11 @@
 
       onClickMenuItem(item) {
         if (item.route)
-          this.$router.push({ path: item.route });
+          if (requests.isExtarnalURI(item.route)) {
+            window.open(item.route, '_blank');
+          } else {
+            this.$router.push({ path: item.route });
+          }
         else
           this.onClickMenuExpand(item);
       },

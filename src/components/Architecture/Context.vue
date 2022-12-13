@@ -40,8 +40,7 @@
       const provider = datasets();
       provider.dsResolver = (id) => {
         return {
-          subject: (this.manifest.contexts || {})[id],
-          baseURI: (this.$store.state.sources.find((item) => item.path === `/contexts/${id}`) || {}).location
+          subject: (this.manifest.datasets || {})[id]
         };
       };
 

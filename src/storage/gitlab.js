@@ -9,6 +9,8 @@ import gateway from '../idea/gateway';
 import consts from '../consts';
 import rules from '../helpers/rules';
 import crc16 from '@/helpers/crc16';
+import entities from '@/helpers/entities';
+import env from '@/helpers/env';
 
 const axios = require('axios');
 
@@ -51,7 +53,6 @@ export default {
 			state.available_projects = {};
 			state.projects = {};
 			state.last_changes = {};
-			state.notInited = null;
 			state.criticalError = null;
 		},
 		setManifest(state, value) {
@@ -101,12 +102,14 @@ export default {
 				net: null
 			};
 			context.commit('setRenderCore', 
-				process.env.VUE_APP_DOCHUB_MODE === 'plugin' ? 'smetana' : 'graphviz'
+				env.isPlugin() ? 'smetana' : 'graphviz'
 			);
 			context.dispatch('reloadAll');
 			let diff_format = cookie.get('diff_format');
 			context.commit('setDiffFormat', diff_format ? diff_format : context.state.diff_format);
 			parser.onReloaded = (parser) => {
+				// Очищяем прошлую загрузку
+				context.commit('clean');
 				// Регистрируем обнаруженные ошибки
 				errors.syntax && context.commit('appendProblems', errors.syntax);
 				errors.net && context.commit('appendProblems', errors.net);
@@ -118,17 +121,21 @@ export default {
 				if (!Object.keys(context.state.manifest || {}).length) {
 					context.commit('setCriticalError', true);
 				}
+				entities(parser.manifest[manifest_parser.MODE_AS_IS]);
 				rules(parser.manifest[manifest_parser.MODE_AS_IS],
 					(problems) => context.commit('appendProblems', problems),
 					(error) => {
 						// eslint-disable-next-line no-console
 						console.error(error);
+						context.commit('appendProblems', error);
 						// eslint-disable-next-line no-debugger
 						debugger;
 					});
 			};
 			parser.onStartReload = () => {
-				context.commit('setNoInited', false);
+				errors.syntax = null;
+				errors.net = null;
+				context.commit('setNoInited', null);
 				context.commit('setIsReloading', true);
 			};
 			parser.onError = (action, data) => {
@@ -184,11 +191,12 @@ export default {
 				if (data) {
 					changes = Object.assign(changes, data);
 					if (refreshTimer) clearTimeout(refreshTimer);
-					refreshTimer = setInterval(() => {
+					refreshTimer = setTimeout(() => {
 						for (const source in changes) {
-							if (context.state.sources.find((item) => {
-								return item.location === source;
-							})) {
+							if (
+								(source === consts.plugin.ROOT_MANIFEST)
+								|| requests.isUsedURL(source)
+							) {
 								// eslint-disable-next-line no-console
 								console.info('>>>>>> GO RELOAD <<<<<<<<<<');
 								changes = {};
@@ -196,7 +204,7 @@ export default {
 								break;
 							}
 						}
-					});
+					}, 350);
 				}
 			});
 		},
@@ -247,7 +255,6 @@ export default {
 
 		// Reload root manifest
 		reloadAll(context) {
-			context.commit('clean');
 			context.dispatch('reloadRootManifest');
 		},
 

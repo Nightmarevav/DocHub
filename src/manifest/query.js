@@ -245,87 +245,106 @@ const SCHEMA_QUERY = `
 `;
 
 const MENU_QUERY = `
-$append((
-    $GET_TITLE := function($LOCATION) {(
-        $STRUCT := $split($LOCATION, "/");
-        $STRUCT[$count($STRUCT) - 1];
-    )};
+(
+	$isURL := $matcher := /^[a-zA-Z]*\\:.*$/i;
+	$isRoot := $matcher := /^\\/.*$/i;
 
-    $MANIFEST := $;
-    [
+    $append((
+        $GET_TITLE := function($LOCATION) {(
+            $STRUCT := $split($LOCATION, "/");
+            $STRUCT[$count($STRUCT) - 1];
+        )};
+    
+        $MANIFEST := $;
+        $append([
+                {
+                    "title": 'Архитектура',
+                    "location": 'Архитектура',
+                    "route": 'architect/',
+                    "expand": true,
+                    "icon": 'home'
+                },
+                {
+                    "title": "Контексты",
+                    "location": 'Архитектура/Контексты',
+                    "icon": 'location_searching'
+                },
+                {
+                    "title": "Аспекты",
+                    "location": 'Архитектура/Аспекты',
+                    "icon": 'visibility',
+                    "route": 'aspects/'
+                },
+                {
+                    "title": 'Документы',
+                    "location": 'Документы',
+                    "expand": true,
+                    "icon": 'description'
+                },
+                contexts.$spread().{
+                    "title": $GET_TITLE($.*.location ? $.*.location : $keys()[0]),
+                    "route": 'architect/contexts/' & $keys()[0],
+                    "hiden": $.*.location ? false : true,
+                    "location": 'Архитектура/Контексты/' & $.*.location,
+                    "icon": $.*.icon ? $.*.icon : ''
+                },
+                aspects.$spread().{
+                    "title": $GET_TITLE($.*.location),
+                    "route": 'architect/aspects/' & $keys()[0],
+                    "location": 'Архитектура/Аспекты/' & $.*.location,
+                    "icon": $.*.icon ? $.*.icon : ''
+                },
+                docs.$spread().{
+                    "title": $GET_TITLE($.*.location),
+                    "route": 'docs/' & $keys()[0],
+                    "hiden": $.*.location ? false : true,
+                    "location": 'Документы/' & $.*.location,
+                    "icon": $.*.icon ? $.*.icon : ''
+                },
+                {
+                    "title": 'Техрадар',
+                    "location": 'Техрадар',
+                    "route": 'techradar',
+                    "icon": 'track_changes'
+                },
+                technologies.sections.$spread().{
+                    "title": $.*.title,
+                    "route": 'techradar/' & $keys()[0],
+                    "location": 'Техрадар/' & $.*.title
+                },
+                {
+                    "title": 'Проблемы',
+                    "location": 'Проблемы',
+                    "route": 'problems',
+                    "icon": 'report_problem'
+                }
+            ][($exists(hiden) and $not(hiden)) or $not($exists(hiden))],
+            entities.*.(
+                $eval(menu, $MANIFEST).{
+                    "route": link,
+                    "location": location,
+                    "icon": icon,
+                    "title": $GET_TITLE(location)
+                }
+            )
+        )
+    ).{
+        "title": "" & title,
+        "route": route ? (
+            $isURL(route) ? route
+            : ($isRoot(route) ? route : '/' & route)
+        ) : undefined,
+        "icon": icon,
+        "location": "" & (location ? location : route)
+    }^(location), [
         {
-            "title": 'Архитектура',
-            "location": 'architect',
-            "route": 'architect/',
-            "expand": true,
-            "icon": 'home'
-        },
-        {
-            "title": "Контексты",
-            "location": 'architect/contexts',
-            "icon": 'location_searching'
-        },
-        {
-            "title": "Аспекты",
-            "location": 'architect/aspects',
-            "icon": 'visibility',
-            "route": 'aspects/'
-        },
-        {
-            "title": 'Документы',
-            "location": 'docs',
-            "expand": true,
-            "icon": 'description'
-        },
-        contexts.$spread().{
-            "title": $GET_TITLE($.*.location ? $.*.location : $keys()[0]),
-            "route": 'architect/contexts/' & $keys()[0],
-            "hiden": $.*.location ? false : true,
-            "location": 'architect/contexts/' & $.*.location,
-            "icon": $.*.icon ? $.*.icon : ''
-        },
-        aspects.$spread().{
-            "title": $GET_TITLE($.*.location),
-            "route": 'architect/aspects/' & $keys()[0],
-            "location": 'architect/aspects/' & $.*.location,
-            "icon": $.*.icon ? $.*.icon : ''
-        },
-        docs.$spread().{
-            "title": $GET_TITLE($.*.location),
-            "route": 'docs/' & $keys()[0],
-            "hiden": $.*.location ? false : true,
-            "location": 'docs/' & $.*.location,
-            "icon": $.*.icon ? $.*.icon : ''
-        },
-        {
-            "title": 'Техрадар',
-            "route": 'techradar',
-            "icon": 'track_changes'
-        },
-        technologies.sections.$spread().{
-            "title": $.*.title,
-            "route": 'techradar/' & $keys()[0],
-            "location": 'techradar/' & $.*.title
-        },
-        {
-            "title": 'Проблемы',
-            "route": 'problems',
-            "icon": 'report_problem'
+            "title": 'JSONata',
+            "route": '/devtool',
+            "icon": 'chrome_reader_mode',
+            "location": "devtool"
         }
-    ][($exists(hiden) and $not(hiden)) or $not($exists(hiden))]
-).{
-    "title": "" & title,
-    "route": route ? '/' & route : undefined,
-    "icon": icon,
-    "location": "" & (location ? location : route)
-}^(location), [
-    {
-        "title": 'JSONata',
-        "route": '/devtool',
-        "icon": 'chrome_reader_mode',
-        "location": "devtool"
-    }
-])
+    ])
+)
 `;
 
 const CONTEXTS_QUERY_FOR_COMPONENT = `
@@ -371,6 +390,12 @@ const SUMMARY_COMPONENT_QUERY = `
             "field": $.$keys()
         });
     )
+)
+`;
+
+const WIDGETS_COMPONENT_QUERY = `
+(
+    entities.components.widgets
 )
 `;
 
@@ -430,6 +455,10 @@ const SUMMARY_ASPECT_QUERY = `
         });
     )
 )
+`;
+
+const WIDGETS_ASPECT_QUERY = `
+    entities.aspects.widgets
 `;
 
 const ASPECT_DEFAULT_CONTEXT = `
@@ -598,12 +627,45 @@ const ARCH_MINDMAP_ASPECTS_QUERY = `
     )]^(id)]
 )`;
 
+const JSONSCEMA_ENTITIES_QUERY = `
+(
+	$manifest := $;
+	{
+		"type": "object",
+		"properties": $merge([
+			$manifest.entities.$spread().({
+				$keys()[0]: $.*.schema
+			})
+		]),
+		"$defs": $merge([$manifest.entities.*.schema."$defs"])
+	};
+)
+`;
+
 // Расширенные функции JSONata
 
 function wcard(id, template) {
 	if (!id || !template) return false;
-	const idStruct = id.split('.');
 	const tmlStruct = template.split('.');
+	let items = [];
+	for (let i = 0; i < tmlStruct.length; i++) {
+		const pice = tmlStruct[i];
+		if (pice === '**') {
+			items.push('.*$');
+			break;
+		} else if (pice === '*') {
+			items.push('[^\\.]*');
+		} else items.push(pice);
+	}
+
+	const isOk = new RegExp(`^${items.join('\\.')}$`);
+	// eslint-disable-next-line no-console
+	console.info('WCARD:', `^${items.join('\\.')}$`);
+
+	return isOk.test(id);
+
+	/*
+	const idStruct = id.split('.');
 	if (tmlStruct.length < idStruct) return false;
 	for (let i = 0; i < tmlStruct.length; i++) {
 		const pice = tmlStruct[i];
@@ -612,6 +674,7 @@ function wcard(id, template) {
 		if (pice !== idStruct[i]) return false;
 	}
 	return idStruct.length === tmlStruct.length;
+    */
 }
 
 function mergeDeep(sources) {
@@ -653,11 +716,13 @@ export default {
 	// Создает объект запроса JSONata
 	//  expression - JSONata выражение
 	//  self - объект, который вызывает запрос (доступен по $self в запросе)
-	expression(expression, self_) {
+	//  params - параметры передающиеся в запрос
+	expression(expression, self_, params) {
 		const obj = {
 			expression,
 			core: null,
 			onError: null,  // Событие ошибки выполнения запроса
+			store: {},      // Хранилище вспомогательных переменных для запросов
 			// Исполняет запрос
 			//  context - контекст исполнения запроса
 			//  def - если возникла ошибка, будет возращено это значение
@@ -666,9 +731,16 @@ export default {
 					if (!this.core) {
 						this.core = jsonata(this.expression);
 						this.core.assign('self', self_);
+						this.core.assign('params', params);
 						this.core.registerFunction('wcard', wcard);
 						this.core.registerFunction('mergedeep', mergeDeep);
 						this.core.registerFunction('jsonschema', jsonSchema);
+						this.core.registerFunction('set', (key, data) => {
+							return obj.store[key] = data;
+						});
+						this.core.registerFunction('get', (key) => {
+							return obj.store[key];
+						});
 					}
 					return Object.freeze(this.core.evaluate(context));
 				} catch (e) {
@@ -705,6 +777,10 @@ export default {
 	summaryForComponent(component) {
 		return SUMMARY_COMPONENT_QUERY.replace(/{%COMPONENT%}/g, component);
 	},
+	// Виджеты компонентов
+	widgetsForComponent() {
+		return WIDGETS_COMPONENT_QUERY;
+	},
 	// Определение размещения манифестов описывающих компонент
 	locationsForComponent(component) {
 		return COMPONENT_LOCATIONS_QUERY.replace(/{%COMPONENT%}/g, component);
@@ -718,6 +794,9 @@ export default {
 	// Сводка по аспекту
 	summaryForAspect(aspect) {
 		return SUMMARY_ASPECT_QUERY.replace(/{%ASPECT%}/g, aspect);
+	},
+	widgetsForAspect() {
+		return WIDGETS_ASPECT_QUERY;
 	},
 	defaultContextForAspect(aspect) {
 		return ASPECT_DEFAULT_CONTEXT.replace(/{%ASPECT%}/g, aspect);
@@ -753,5 +832,9 @@ export default {
 	// MindMap по архитектурным аспектам
 	archMindMapAspects(root) {
 		return ARCH_MINDMAP_ASPECTS_QUERY.replace(/{%ROOT%}/g, root || '');
+	},
+	// Сводная JSONSchema по всем кастомным сущностям
+	entitiesJSONChema() {
+		return JSONSCEMA_ENTITIES_QUERY;
 	}
 };

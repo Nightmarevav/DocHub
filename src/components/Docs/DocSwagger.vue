@@ -1,13 +1,5 @@
 <template>
-  <div
-    v-if="url"
-    v-bind:id="id">
-    <v-alert
-      v-bind:value="!!error"
-      type="error">
-      {{ error }}
-    </v-alert>
-  </div>
+  <box v-bind:id="id" />
 </template>
 
 <script>
@@ -22,8 +14,7 @@
     data() {
       return {
         id : `swagger-${Date.now()}-${Math.round(Math.random() * 10000)}`,
-        data: null,
-        error: null
+        data: null
       };
     },
     methods: {
@@ -39,11 +30,7 @@
           .then((response) => {
             this.data = response.data;
             this.swaggerRender();
-          }).catch((e) => {
-            this.error = `${e} [${this.url}]`;
-            // eslint-disable-next-line no-console
-            console.error(this.error);
-          });
+          }).catch((e) => this.error = e);
         this.sourceRefresh();  
       },
 

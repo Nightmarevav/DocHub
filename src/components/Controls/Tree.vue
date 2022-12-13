@@ -1,5 +1,5 @@
 <template>
-  <tree-item v-bind:items="items" />
+  <tree-item v-bind:expands="expands" v-bind:items="items" />
 </template>
 
 <script>
@@ -16,6 +16,7 @@
     },
     data() {
       return {
+        expands: {}
       };
     },
     computed: {

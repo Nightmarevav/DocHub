@@ -277,7 +277,6 @@ e;e--)d[e]();if(0<nb)return 0}return Module.setStatus?(Module.setStatus("Running
       }      
     </style>
     <script>
-      window.$IDE_PLUGIN = true;
       window.$PAPI = {
         isDebug: false,
         middleware: function(response) {
@@ -328,6 +327,12 @@ e;e--)d[e]();if(0<nb)return 0}return Module.setStatus?(Module.setStatus("Running
         },
         download: function(content, title, description) {
           this.request({url: `plugin:/idea/gateway/download`, content, title, description});
+        },
+        applyEntitiesSchema: function(schema) {
+          this.request({url: `plugin:/idea/entities/applyschema`, schema});
+        },
+        copyToClipboard: function(data) {
+          this.request({url: `plugin:/idea/clipboard/copy`, data});
         }
       };      
       "API_INJECTION"

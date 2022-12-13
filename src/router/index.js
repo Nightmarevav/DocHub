@@ -17,6 +17,8 @@ import AspectsMindmap from '../components/Mindmap/AspectsMindmap';
 import gateway from '../idea/gateway';
 import Empty from '../components/Controls/Empty';
 import DevTool from '../components/JSONata/DevTool';
+import Entity from '../components/Entities/Entity';
+import env from '@/helpers/env';
 
 Vue.use(Router);
 
@@ -130,6 +132,12 @@ const rConfig = {
 			props: middleware
 		},
 		{
+			name: 'entities',
+			path: '/entities/:entity/:presentation',
+			component: Entity,
+			props: middleware
+		},
+		{
 			name: 'Empty',
 			path: '*',
 			component: Empty
@@ -137,7 +145,7 @@ const rConfig = {
 	]
 };
 
-if (process.env.VUE_APP_DOCHUB_MODE !== 'plugin') {
+if (!env.isPlugin()) {
 	rConfig.mode = 'history';
 	rConfig.routes.push(
 		{

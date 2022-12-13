@@ -28,7 +28,16 @@ let config = {
 				inlineSource: '.(woff(2)?|ttf|eot|svg|js|css)$'
 			}),
 			new HtmlWebpackInlineSourcePlugin()
-		]
+		],
+		module: {
+			rules: [
+				{
+					test: /\.mjs$/,
+					include: /node_modules/,
+					type: 'javascript/auto'
+				}
+			]
+		}		
 	}    
 };
 

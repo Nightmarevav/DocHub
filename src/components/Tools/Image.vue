@@ -1,5 +1,5 @@
 <template>
-  <img v-bind:src="data">
+  <img v-bind:src="data" style="max-width:100%">
 </template>
 
 <script>

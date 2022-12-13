@@ -1,3 +1,5 @@
+allow_mixing
+
 !unquoted procedure $Region($alias, $label, $type)
     !if ($type)
         rectangle "$label" <<$type>> as r-$alias

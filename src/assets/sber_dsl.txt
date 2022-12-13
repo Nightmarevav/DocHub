@@ -1,3 +1,5 @@
+allow_mixing
+
 'Общее позиционирование
 skinparam {
 	wrapWidth 200

@@ -42,6 +42,7 @@ const crcTable = [0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5,
 	0x8fd9, 0x9ff8, 0x6e17, 0x7e36, 0x4e55, 0x5e74,
 	0x2e93, 0x3eb2, 0x0ed1, 0x1ef0];
 
+/*	
 export default function(str)  {
 	let crc = 0xFFFF;
 	let j, i;
@@ -51,6 +52,19 @@ export default function(str)  {
 			throw new RangeError();
 		}
 		j = (c ^ (crc >> 8)) & 0xFF;
+		crc = crcTable[j] ^ (crc << 8);
+	}
+	return ((crc ^ 0) & 0xFFFF);
+}
+*/
+
+export default function(str)  {
+	const enc = new TextEncoder();
+	const buffer = enc.encode(str);
+	let crc = 0xFFFF;
+	let j, i;
+	for (i = 0; i < buffer.length; i++) {
+		j = (buffer[i] ^ (crc >> 8)) & 0xFF;
 		crc = crcTable[j] ^ (crc << 8);
 	}
 	return ((crc ^ 0) & 0xFFFF);

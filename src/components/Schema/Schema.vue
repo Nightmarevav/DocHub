@@ -93,6 +93,9 @@
         return structure;
       },
       uml() {
+
+        if (!this.schema.components) return '';
+
         let uml = '@startuml\n';
 
         // Определяем в какой нотации будем выводить схему

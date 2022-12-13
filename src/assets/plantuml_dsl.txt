@@ -1,4 +1,5 @@
 skinparam useBetaStyle true
+allow_mixing
 '!pragma layout elk
 '!pragma layout smetana
 skinparam {

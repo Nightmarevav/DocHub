@@ -3,7 +3,6 @@
     id="keep"
     v-bind:class="{'no-select-text': isDrawerResize}">
     <v-app-bar
-      v-show="!isLoading"
       app
       clipped-left
       color="#3495db"
@@ -42,7 +41,6 @@
       -->
     </v-app-bar>
     <v-navigation-drawer
-      v-show="!isLoading"
       ref="drawer"
       v-model="drawer"
       v-bind:width="width"
@@ -52,18 +50,20 @@
       <menu-component />
     </v-navigation-drawer>
     <plugin-init v-if="isNotInited" />
-    <v-content v-else v-show="!isLoading" style="min-height:100%" class="router-view">
+    <v-content v-else style="min-height:100%" class="router-view">
       <problems v-if="isCriticalError" />
       <router-view v-else />
     </v-content>
-    <v-progress-circular
-      v-show="isLoading"
-      v-bind:size="64"
-      v-bind:width="7"
-      style="left: 50%; top: 50%; position: absolute; margin-left: -32px; margin-top: -32px;"
-      v-bind:value="60"
-      color="primary"
-      indeterminate />
+    <template v-if="isLoading">
+      <div class="loading-splash" />
+      <v-progress-circular
+        class="whell"
+        v-bind:size="64"
+        v-bind:width="7"
+        v-bind:value="60"
+        color="primary"
+        indeterminate />
+    </template>
   </v-app>
 </template>
 
@@ -72,6 +72,7 @@
   import MenuComponent from './Menu';
   import PluginInit from '../idea/components/Init.vue';
   import Problems from './Problems/Problems.vue';
+  import env from '@/helpers/env';
 
   const minDrawerSize = 200;
   const defaultDrawerSize = 300;
@@ -88,7 +89,7 @@
         drawer: null,
         isDrawerResize: false,
         width: defaultDrawerSize,
-        isPlugin: process.env.VUE_APP_DOCHUB_MODE === 'plugin'
+        isPlugin: env.isPlugin()
       };
     },
     computed: {
@@ -189,6 +190,28 @@
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
+}
+
+.loading-splash {
+  background: #FFF;
+  opacity: 0.7;
+  z-index: 10;  
+  position: absolute; 
+  left: 0; 
+  top: 0; 
+  bottom: 0; 
+  right: 0; 
+  filter: blur(8px);
+  -webkit-filter: blur(8px);  
+}
+
+.whell {
+  z-index: 100;  
+  left: 50%;
+  top: 50vh;
+  position: absolute !important;
+  margin-left: -32px;
+  margin-top: -32px;
 }
 
 </style>

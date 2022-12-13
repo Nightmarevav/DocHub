@@ -1,3 +1,4 @@
+# Правила контроля целостности DocHub
 rules:
   validators:
     dochub:
@@ -137,3 +138,129 @@ rules:
             }]
         )
 
+# Сущности матемодели DocHub (!!!! в проектировании !!!!)
+entities_: 
+    # Аспекты
+    aspects2:
+        title: Аспекты
+        description: Архитектурные аспекты
+        menu: >
+            (
+                $append([{
+                    "icon": "visibility",
+                    "link": "/docs/general",
+                    "location": "Аспекты"
+                }], [$.aspects.$spread().{
+                    "icon": *.icon,
+                    "link": "/aspects/blank?id=" & $keys()[0],
+                    "location": *.location
+                }])[location]
+            )
+        presentations:          
+            general:            # Дерево аспектов
+                type: plantuml  # Показываем дерево аспектов в PlantUML
+                template: >     # Шаблон представления дерева аспектов
+                  @startwbs
+                  * Аспекты
+                  {{#.}}
+                  {{level}} [[{{link}} {{title}}]]
+                  {{/.}}
+                  @endwbs
+                source: >       # Данные для дерева аспектов
+                  (
+                    $set("rpev-id", undefined);
+                    $arrleft := function($arr ,$count) {
+                            $map($arr, function($v, $i) {
+                        $i <= $count ? $v
+                      })
+                    };
+                    $aspects := $.aspects;
+                    $aspects.$spread().($merge([{"id" : $keys()[0]}, $.*]))^(id).(
+                      $prev_nodes := $split($get("rpev-id"), ".");
+                      $prev_level := $count($prev_nodes);
+                      $curr_nodes := $split(id, ".");
+                      $set("isdiff", false);
+                      $result := $map($curr_nodes, function($v, $i) {(
+                        $set("isdiff", $get("isdiff") or $prev_level = 0 or $prev_level < $i or $v != $prev_nodes[$i]) ? (
+                          $id := $join($arrleft($curr_nodes, $i), ".");
+                          $aspect :=  $lookup($aspects, $id);
+                          {
+                            "id": $id,
+                            "level": $pad("", $i + 1, "*"),
+                            "title": $aspect ? $aspect.title : $id
+                          }
+                        );
+                      )});
+                      $set("rpev-id", id);
+                      $result 
+                    );
+                  )  
+            blank:
+              type: markdown
+              template: >     # Шаблон представления дерева аспектов
+                # Карточка аспекта
+    # Документы
+    docs2:
+        title: Документы        # Название сущности. Обязательно.
+        description: Документы  # Описание сущности текст или ссылка на документ. Необязательно.
+        menu: >                 # Генератор раcположения в меню. Запрос или явное описание объета. Необязательно.
+            (
+                [$.docs.$spread().{
+                    "icon": *.icon,                 /* Получаем иконку */
+                    "link": "/docs/" & $keys()[0],  /* Формируем ссылку на документ */
+                    "location": *.location          /* Формируем расположение в меню */
+                }][location]
+            )
+        presentations:          # Представления объектов сущности. Обязательно.
+            general: >          # Основное представление. JSONata запрос или объект. Обязательно.
+                (
+                    $this   /* В $this объект. Вовращаем все поля документа как есть. */
+                )
+        schema:                 # JSON Schema контролирующая описание объекта сущности
+            type: object
+            patternProperties:
+                "[a-zA-Z0-9_]*(\\.[a-zA-Z0-9_]*)*$": # Шаблон ключа
+                    type: object
+                    properties:
+                        icon:
+                            title: Иконка документа
+                            type: string
+                            minLength: 3
+                        location:
+                            title: Расположение документа в меню
+                            type: string
+                            minLength: 1
+                        description:
+                            title: Описание документа
+                            type: string
+                            minLength: 1
+                        type:
+                            title: Тип документа
+                            type: string
+                            enum: 
+                                - OpenAPI
+                                - AsyncAPI
+                                - Markdown
+                                - Table
+                                - PlantUML
+                        subjects:
+                            title: К каким объектам относится документ
+                            type: array
+                            minItems: 1
+                            items:
+                                type: string
+                                minLength: 1
+                        source:
+                            title: Источник (JSON запрос или источник данных для шаблона / Ссылка на файл)
+                            type: string
+                            minLength: 1
+                        origin:
+                            title: Исходные данные для запроса в source (JSON запрос или источник данных)
+                            type: string
+                            minLength: 1
+                        template:
+                            title: Шаблон (текст или ссылка на файл)
+                            type: string
+                            minLength: 1
+                    required:
+                        - type

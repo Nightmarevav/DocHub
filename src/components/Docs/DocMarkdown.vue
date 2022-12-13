@@ -1,5 +1,5 @@
 <template>
-  <div class="space">
+  <box class="space">
     <dochub-anchor id="" />
     <div v-if="toc" class="toc" v-html="toc" />
     <markdown
@@ -12,7 +12,7 @@
       v-on:rendered="rendered">
       {{ markdown }}
     </markdown>
-    <final-markdown v-if="showDocument && outHTML" v-bind:template="outHTML" v-bind:base-u-r-i="url" />
+    <final-markdown v-if="showDocument" v-bind:template="outHTML || ''" v-bind:base-u-r-i="url" />
     <v-progress-circular
       v-else
       v-bind:size="64"
@@ -21,7 +21,7 @@
       v-bind:value="60"
       color="primary"
       indeterminate />
-  </div>
+  </box>
 </template>
 
 <script>
@@ -30,6 +30,7 @@
   import DocMarkdownObject from './DocHubObject';
   import DocMixin from './DocMixin';
   import mustache from 'mustache';
+  import href from '../../helpers/href';
   
   export default {
     name: 'DocMarkdown',
@@ -47,34 +48,17 @@
           this.$options.template = `<div class="markdown-document">${this.template}</div>`;
         },
         mounted() {
-          this.refactoringRefs();
-        },
-        methods: {
-          refactoringRefs() {
-            const refs = this.$el.querySelectorAll('a');
-            for (let i = 0; i < refs.length; i++) {
-              try {
-                const href = refs[i].href;
-                const url = new URL(href);
-                if (
-                  url.origin === document.location.origin
-                  && (['architect', 'docs'].indexOf(url.pathname.split('/')[1].toLocaleLowerCase()) >= 0)
-                ) {
-                  refs[i].addEventListener('click', (event) => {
-                    event.preventDefault();
-                    this.$router.push({ path: href.substring(url.origin.length) });
-                  });
-                }
-              } catch (e) {
-                // eslint-disable-next-line no-console
-                console.warn(e);
-              }
-            }
-          }
+          href.elProcessing(this.$el);
         }
       }
     },
     mixins: [DocMixin],
+    props: {
+      tocShow: {
+        type: Boolean,
+        default: true
+      }
+    },
     data() {
       return {
         showDocument: false,
@@ -88,7 +72,7 @@
       rendered(outHtml) {
         if (this.outHTML !== outHtml) {
           this.outHTML = outHtml
-            .replace(/<img /g, '<dochub-object :baseURI="baseURI" ')
+            .replace(/<img /g, '<dochub-object :baseURI="baseURI" :inline="true" ')
             .replace(/\{\{/g, '<span v-pre>{{</span>')
             .replace(/\}\}/g, '<span v-pre>}}</span>');
           this.showDocument = false;
@@ -96,11 +80,11 @@
             this.showDocument = true;
             window.location.hash && setTimeout(() => window.location.href = window.location.hash, 50);
           });
-          this.markdown = null;
         }
+        this.markdown = null;
       },
       tocRendered(tocHTML) {
-        this.toc = tocHTML;
+        if (this.tocShow) this.toc = tocHTML;
       },
       refresh() {
         if (!this.url) {
@@ -119,11 +103,8 @@
               this.markdown = mustache.render(data, this.source.dataset);
             } else
               this.markdown = data;
-          })
-            .catch((e) => {
-              // eslint-disable-next-line no-console
-              console.error(e, `Ошибка запроса [${this.url}]`, e);
-            });
+            this.showDocument = true;
+          }).catch((e) => this.error = e);
         }, 50);
         this.sourceRefresh();
       }
@@ -139,7 +120,8 @@
 .space {
   padding: 24px;
   position: relative;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  min-height: 60px;
 }
 .toc {
   margin-bottom: 24px;

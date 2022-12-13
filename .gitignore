@@ -14,7 +14,8 @@ node_modules
 *.env*
 !example.env
 
-
+# local bugs log
+bugs.bug
 
 # Log files
 npm-debug.log*

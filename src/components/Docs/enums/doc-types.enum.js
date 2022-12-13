@@ -3,5 +3,7 @@ export const DocTypes = {
 	OPENAPI: 'openapi',
 	PLANTUML: 'plantuml',
 	MARKDOWN: 'markdown',
-	TABLE: 'table'
+	TABLE: 'table',
+	MERMAID: 'mermaid',
+	NETWORK: 'network'
 };

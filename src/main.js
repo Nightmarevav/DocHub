@@ -19,6 +19,7 @@ import Radar from './components/Techradar/Main.vue';
 import Technology from './components/Techradar/Technology.vue';
 import Anchor from './components/Tools/Anchor.vue';
 import Image from './components/Tools/Image.vue';
+import Entity from './components/Entities/Entity.vue';
 import GlobalMixin from './mixins/global';
 import gitlab from './storage/gitlab';
 
@@ -54,6 +55,7 @@ Vue.component('DochubImage', Image);
 Vue.component('DochubTechnology', Technology);
 Vue.component('DochubRadar', Radar);
 Vue.component('DochubPlantuml', PlantUML);
+Vue.component('DochubEntity', Entity);
 
 Vue.mixin(GlobalMixin);
 Vue.config.ignoredElements = ['asyncapi-component'];

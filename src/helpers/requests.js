@@ -2,7 +2,11 @@ import axios  from  'axios';
 import gitlab from './gitlab';
 import config from '../../config';
 import YAML from 'yaml';
+import crc16 from './crc16';
+import env from './env';
 
+// CRC16 URL задействованных файлов
+const tracers = {};
 
 // Add a request interceptor
 
@@ -68,7 +72,7 @@ export default {
 		return (uri.slice(0, window.origin.length) !== window.origin) && this.isURL(uri);
 	},
 	getSourceRoot(){
-		if(window.$IDE_PLUGIN) {
+		if(env.isPlugin()) {
 			return 'plugin:/idea/source/';
 		} else 
 			return window.origin + '/';
@@ -179,6 +183,16 @@ export default {
 		return result;
 	},
 
+	// Фиксируются все обращения для построения карты задействованных русурсов
+	trace(url) {
+		tracers[crc16(url)] = Date.now();
+	},
+
+	// Возвращает время последнего обращения к ресурсу
+	isUsedURL(url) {
+		return tracers[crc16(url)];
+	},
+
 	// axios_params - параметры передавамые в axios 
 	// 		responseHook - содержит функцию обработыки ответа перед работой interceptors
 	//		raw - если true возвращает ответ без обработки
@@ -186,7 +200,8 @@ export default {
 		let params = Object.assign({}, axios_params);
 		params.source = this.makeURL(uri, baseURI);
 		params.url = params.source.url.toString();
-		if (window.$IDE_PLUGIN && params.url.split(':')[0] === 'plugin') {
+		if (env.isPlugin() && params.url.split(':')[0] === 'plugin') {
+			this.trace(params.url);
 			return window.$PAPI.request(params);
 		} else {
 			return axios(params);

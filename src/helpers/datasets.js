@@ -9,10 +9,11 @@ export default function() {
 			return null;
 		},
 		// Парсит поле данных в любом объекте
-		//      context - Контекст данных для выполнения запросов
-		//      data - данные требующие парсинга
-		//		subject - объект - владелец
-		parseSource(context, data, subject) {
+		//  context - Контекст данных для выполнения запросов
+		//  data - данные требующие парсинга
+		//	subject - объект - владелец
+		//  params - параметры передающиеся в запрос
+		parseSource(context, data, subject, params) {
 			return new Promise((resolve, reject) => {
 				// Константные данные
 				if(typeof data === 'object') {
@@ -20,7 +21,9 @@ export default function() {
 				} else if (typeof data === 'string') {
 					// Inline запрос JSONata
 					if (/(\s+|)\(((.*|\d|\D)+?)(\)(\s+|))$/.test(data)) {
-						resolve(query.expression(data, subject).evaluate(context));
+						const exp = query.expression(data, subject, params);
+						exp.onError = reject;
+						resolve(exp.evaluate(context));
 						// Ссылка на файл с данными
 					} else if (data.slice(-5) === '.yaml' || data.slice(-5) === '.json' || (data.search(':') > 0)) {
 						requests.request(data)
@@ -33,10 +36,11 @@ export default function() {
 					} else if (data.slice(-8) === '.jsonata') {
 						const url = docs.urlFromProfile({source: data});
 						requests.request(url).then((response) => {
-							resolve(query.expression(typeof response.data === 'string' 
+							const exp = query.expression(typeof response.data === 'string' 
 								? response.data 
-								: JSON.stringify(response.data)).evaluate(context)
-							, subject);
+								: JSON.stringify(response.data), params);
+							exp.onError = reject;
+							resolve(exp.evaluate(context), subject);
 						}).catch((e) => reject(e));
 						// Идентификатор источника данных
 					} else {
@@ -54,10 +58,11 @@ export default function() {
 		// Возвращает данные по субъекту
 		//  context - данные для запроса
 		//  subject - субъект данных
-		getData(context, subject) {
+		//  params - параметры передающиеся в запрос
+		getData(context, subject, params) {
 			return new Promise((resolve, reject) => {
 				const exec = (origin) => {
-					this.parseSource(origin, subject.source || (subject.data /* depricated */), subject)
+					this.parseSource(origin, subject.source || (subject.data /* depricated */), subject, params)
 						.then((data) => resolve(data))
 						.catch((e) => reject(e));
 				};

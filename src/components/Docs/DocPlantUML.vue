@@ -1,5 +1,7 @@
 <template>
-  <plantuml v-if="uml" v-bind:uml="uml" />
+  <box>
+    <plantuml v-if="uml" v-bind:uml="uml" />
+  </box>
 </template>
 
 <script>
@@ -31,10 +33,7 @@
           if (this.isTemplate) {
             this.uml = mustache.render(content, this.source.dataset);
           } else this.uml = content;
-        }).catch((e) => {
-          // eslint-disable-next-line no-console
-          console.error(`Ошибка запроса [${this.url}]`, e);
-        });
+        }).catch((e) => this.error = e);
         this.sourceRefresh();
       }
     }
