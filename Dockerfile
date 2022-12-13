@@ -24,9 +24,8 @@ RUN npm run build
 
 
 
-
-
 FROM ghcr.io/rabotaru/dochub/nginx:v0.0.3 as nginx
 COPY --chown=101 --from=builder /vagrant/pics /usr/share/nginx/html/pics
 COPY --chown=101 --from=builder /var/www/dist /usr/share/nginx/html
+COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8079
