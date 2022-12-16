@@ -1,9 +1,30 @@
 import config from '../../config';
 import requests from '../helpers/requests';
+import axios from 'axios';
 
 export default {
+	prepareRequest(uml) {
+		switch(config.pumlRequestType) {
+		case 'post':
+			return axios.post(this.svgBaseURL(), uml, {
+				headers: {
+					'Content-Type': 'text/plain; charset=UTF-8'
+				}
+			});
+		case 'post_compressed':
+			return axios.post(this.svgBaseURL() + 'compressed', this.compress(uml));
+		default:
+			return axios.get(this.svgURL(uml));
+		}
+
+	},
 	svgURL(uml) {
-		return this.compress(uml);
+		return this.svgBaseURL() + this.compress(uml);
+	},
+	svgBaseURL() {
+		return !requests.isURL(config.pumlServer)
+			? `${window?.location?.protocol || 'https:'}//${config.pumlServer}`
+			: config.pumlServer;
 	},
 	encode64_(e) {
 		let r, i;
@@ -36,12 +57,7 @@ export default {
 		// eslint-disable-next-line no-undef
 		let compressor = new Zopfli.RawDeflate(arr);
 		let compressed = compressor.compress();
-		
-		const serverURL = 
-			!requests.isURL(config.pumlServer) 
-				? `${window?.location?.protocol || 'https:'}//${config.pumlServer}`
-				: config.pumlServer;
 
-		return serverURL + this.encode64_(compressed);
+		return this.encode64_(compressed);
 	}
 };

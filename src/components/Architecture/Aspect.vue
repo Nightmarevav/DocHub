@@ -51,16 +51,21 @@
             </v-card>
             <src-locations v-bind:locations="srcLocations" />
 
-            <widget 
+            <v-card 
               v-for="widget in widgets.left"
-              v-bind:id="widget.id"
               v-bind:key="widget.id"
-              class="card-item"
-              xs12
-              md12
-              v-bind:profile="widget.profile"
-              v-bind:base-u-r-i="widget.baseURI"
-              v-bind:params="widget.params" />
+              class="card-item" 
+              xs12 
+              md12>
+              <v-card-title>
+                <v-icon left>description</v-icon>
+                <span class="title">{{ widget.title }}</span>
+              </v-card-title>
+              <entity 
+                entity="aspects"
+                v-bind:presentation="widget.presentation"
+                v-bind:params="widget.params" />
+            </v-card>
           </v-container>
         </v-layout>
       </v-flex>
@@ -72,29 +77,39 @@
           v-bind:contexts="contexts"
           d-flex />  
 
-        <widget
+        <v-card 
           v-for="widget in widgets.right"
-          v-bind:id="widget.id" 
           v-bind:key="widget.id"
-          xs12
-          md7
-          class="card-item"
-          v-bind:profile="widget.profile"
-          v-bind:base-u-r-i="widget.baseURI"
-          v-bind:params="widget.params" />
+          class="card-item" 
+          xs12 
+          md7>
+          <v-card-title>
+            <v-icon left>description</v-icon>
+            <span class="title">{{ widget.title }}</span>
+          </v-card-title>
+          <entity 
+            entity="aspects"
+            v-bind:presentation="widget.presentation"
+            v-bind:params="widget.params" />
+        </v-card>
       </v-flex>
+
       <v-flex xs12 md12 d-flex>
-        <widget
+        <v-card 
           v-for="widget in widgets.fill"
-          v-bind:id="widget.id" 
           v-bind:key="widget.id"
-          xs12
-          md12
-          class="card-item"
-          style="margin-top: 12px; "
-          v-bind:profile="widget.profile"
-          v-bind:base-u-r-i="widget.baseURI"
-          v-bind:params="widget.params" />
+          class="card-item" 
+          xs12 
+          md12>
+          <v-card-title>
+            <v-icon left>description</v-icon>
+            <span class="title">{{ widget.title }}</span>
+          </v-card-title>
+          <entity 
+            entity="aspects"
+            v-bind:presentation="widget.presentation"
+            v-bind:params="widget.params" />
+        </v-card>
       </v-flex>
     </v-layout>
 
@@ -112,7 +127,7 @@
   import SrcLocations from './tabs/SrcLocations.vue';
   import requests from '@/helpers/requests';
   import env from '@/helpers/env';
-  import Widget from './Widget.vue';
+  import Entity from '@/components/Entities/Entity.vue';
 
   export default {
     name: 'Aspect',
@@ -122,7 +137,7 @@
       TabContexts,
       Empty,
       SrcLocations,
-      Widget
+      Entity
     },
     props: {
       aspect: { type: String, default: '' }
@@ -183,19 +198,12 @@
         };
         const widgets = (query.expression(query.widgetsForAspect()).evaluate(this.manifest) || {});
         for (const id in widgets) {
-          const wiget = widgets[id];
-          const profile = {
-            id,
-            profile: widgets[id],
-            baseURI: (this.$store.state.sources.find((item) => item.path === `/entities/aspects/widgets/${id}`) || {}).location,
-            params: {
-              aspect: this.aspect
-            }
-          };
+          let wiget = widgets[id];
+          wiget.params = Object.assign(wiget.params || {}, {aspect: this.aspect});
           switch(wiget.align) {
-            case '<': result.left.push(profile); break;
-            case '>': result.right.push(profile); break;
-            default: result.fill.push(profile); break;
+            case '<': result.left.push(wiget); break;
+            case '>': result.right.push(wiget); break;
+            default: result.fill.push(wiget); break;
           }
         }
         return result;

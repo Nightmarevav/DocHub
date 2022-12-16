@@ -4,9 +4,9 @@
     <empty v-if="isEmpty" />
     <template v-else>
       <v-layout wrap>
-        <v-flex xs12 md5 d-flex>
+        <v-flex xs12 md5 d-flex style="padding-top: 0">
           <v-layout wrap>
-            <v-container grid-list-xl fluid>
+            <v-container grid-list-xl fluid style="padding-top: 0">
               <v-card class="card-item" xs12 md12>
                 <v-card-title>
                   <v-icon left>settings</v-icon>
@@ -33,7 +33,7 @@
 
               <docs v-bind:subject="component" />
 
-              <v-card class="card-item" xs12 md12 style="margin-top: 12px">
+              <v-card class="card-item" xs12 md12>
                 <v-card-title>
                   <v-icon left>description</v-icon>
                   <span class="title">Иерархия</span>
@@ -45,17 +45,21 @@
 
               <src-locations v-bind:locations="srcLocations" />
 
-              <widget 
+              <v-card 
                 v-for="widget in widgets.left"
-                v-bind:id="widget.id"
                 v-bind:key="widget.id"
                 class="card-item"
-                style="margin-top: 12px"
-                xs12
-                md12
-                v-bind:profile="widget.profile"
-                v-bind:base-u-r-i="widget.baseURI"
-                v-bind:params="widget.params" />
+                xs12 
+                md12>
+                <v-card-title>
+                  <v-icon left>description</v-icon>
+                  <span class="title">{{ widget.title }}</span>
+                </v-card-title>
+                <entity 
+                  entity="components"
+                  v-bind:presentation="widget.presentation"
+                  v-bind:params="widget.params" />
+              </v-card>
             </v-container>
           </v-layout>
         </v-flex>
@@ -69,32 +73,40 @@
               v-bind:manifest="manifest"
               d-flex />
 
-            <widget
+            <v-card 
               v-for="widget in widgets.right"
-              v-bind:id="widget.id" 
               v-bind:key="widget.id"
-              xs12
-              md7
-              class="card-item"
-              style="margin-top: 12px"
-              v-bind:profile="widget.profile"
-              v-bind:base-u-r-i="widget.baseURI"
-              v-bind:params="widget.params" />
+              class="card-item" 
+              xs12 
+              md7>
+              <v-card-title>
+                <v-icon left>description</v-icon>
+                <span class="title">{{ widget.title }}</span>
+              </v-card-title>
+              <entity 
+                entity="components"
+                v-bind:presentation="widget.presentation"
+                v-bind:params="widget.params" />
+            </v-card>
           </v-layout>
         </v-flex>
       </v-layout>
       <v-layout v-if="widgets.fill.length" wrap style="height: auto">
-        <widget
+        <v-card 
           v-for="widget in widgets.fill"
-          v-bind:id="widget.id" 
           v-bind:key="widget.id"
-          xs12
-          md12
-          class="card-item"
-          style="margin-top: 12px"
-          v-bind:profile="widget.profile"
-          v-bind:base-u-r-i="widget.baseURI"
-          v-bind:params="widget.params" />
+          class="card-item" 
+          xs12 
+          md12>
+          <v-card-title>
+            <v-icon left>description</v-icon>
+            <span class="title">{{ widget.title }}</span>
+          </v-card-title>
+          <entity 
+            entity="components"
+            v-bind:presentation="widget.presentation"
+            v-bind:params="widget.params" />
+        </v-card>
       </v-layout>
     </template>
   </v-container>
@@ -110,7 +122,7 @@
   import Docs from './tabs/Docs.vue';
   import requests from '@/helpers/requests';
   import env from '@/helpers/env';
-  import Widget from './Widget.vue';
+  import entity from '@/components/Entities/Entity.vue';
 
   export default {
     name: 'ArchComponent',
@@ -120,7 +132,7 @@
       TabContexts,
       Empty,
       SrcLocations,
-      Widget
+      entity
     },
     props: {
       component: { type: String, default: '' }
@@ -180,19 +192,12 @@
         };
         const widgets = (query.expression(query.widgetsForComponent()).evaluate(this.manifest) || {});
         for (const id in widgets) {
-          const wiget = widgets[id];
-          const profile = {
-            id,
-            profile: widgets[id],
-            baseURI: (this.$store.state.sources.find((item) => item.path === `/entities/components/widgets/${id}`) || {}).location,
-            params: {
-              component: this.component
-            }
-          };
+          let wiget = widgets[id];
+          wiget.params = Object.assign(wiget.params || {}, {component: this.component});
           switch(wiget.align) {
-            case '<': result.left.push(profile); break;
-            case '>': result.right.push(profile); break;
-            default: result.fill.push(profile); break;
+            case '<': result.left.push(wiget); break;
+            case '>': result.right.push(wiget); break;
+            default: result.fill.push(wiget); break;
           }
         }
         return result;
@@ -212,5 +217,6 @@
 <style scoped>
   .card-item {
     width: 100%;
+    margin-top: 12px;
   }
 </style>

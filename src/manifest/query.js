@@ -395,7 +395,10 @@ const SUMMARY_COMPONENT_QUERY = `
 
 const WIDGETS_COMPONENT_QUERY = `
 (
-    entities.components.widgets
+	$pres := entities.components.presentations;
+	[$pres.blank.widgets.$spread().(
+		$merge([{ "id": $keys()[0]}, *])
+	)]
 )
 `;
 
@@ -458,7 +461,12 @@ const SUMMARY_ASPECT_QUERY = `
 `;
 
 const WIDGETS_ASPECT_QUERY = `
-    entities.aspects.widgets
+(
+    $pres := entities.aspects.presentations;
+    [$pres.blank.widgets.$spread().(
+        $merge([{ "id": $keys()[0]}, *])
+    )]
+)   
 `;
 
 const ASPECT_DEFAULT_CONTEXT = `

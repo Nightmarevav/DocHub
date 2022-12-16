@@ -38,7 +38,8 @@
         if (this.url) {
           SwaggerUI({
             dom_id: `#${this.id}`,
-            spec: this.data
+            spec: this.data,
+            deepLinking: true
           });
         }
       }

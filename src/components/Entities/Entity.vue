@@ -1,13 +1,24 @@
 <template>
-  <doc 
-    v-bind:profile-resolver="profileResolver" 
-    v-bind:url-resolver="urlResolver"
-    v-bind:params="entityParams" />
+  <div>
+    <doc
+      v-if="!isParmasInvalid" 
+      v-bind:profile-resolver="profileResolver" 
+      v-bind:url-resolver="urlResolver"
+      v-bind:params="entityParams" />
+    <v-alert v-else type="error" v-bind:value="true" style="white-space: pre-wrap;">
+      Сущность: {{ entity }}<br>
+      Представление: {{ presentation }}<br>
+      {{ isParmasInvalid.name }}:<br>
+      {{ isParmasInvalid.error }}
+    </v-alert>      
+  </div>
 </template>
 
 <script>
   import docs from '@/helpers/docs';
   import doc from '../Docs/DocHubDoc.vue';
+  import ajv from 'ajv';
+  const ajv_localize = require('ajv-i18n/localize/ru');
 
   export default {
     name: 'Entity',    
@@ -33,12 +44,32 @@
       };
     },
     computed: {
+      // Валидируем входящие параметры, если контракт на параметры определен
+      isParmasInvalid() {
+        const schema = this.presProfile.params;
+        if (schema) {
+          try {
+            const rules = new ajv({ allErrors: true });
+            const validator = rules.compile(schema);
+            if (validator(this.entityParams)) return false;
+            ajv_localize(validator.errors);
+            return {
+              name: 'Ошибка валидации параметров',
+              error: JSON.stringify(validator.errors, null, 4)
+            };
+          } catch (e) {
+            return {
+              name: 'Ошибка описания схемы',
+              error: e
+            };
+          }
+        } else return false;
+      },
+      // Получаем профиль представления
       presProfile() {
         return this.manifest?.entities?.[this.entity]?.presentations?.[this.presentation] || {};
       },
-      entityData() {
-        return this.manifest?.[this.entity];
-      },
+      // Формируем параметры для документа
       entityParams() {
         return this.params || (this.$route.params && this.$router.currentRoute.query);
       }
