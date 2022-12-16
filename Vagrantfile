@@ -12,20 +12,31 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--ioapic", "on"]
-    vb.customize ["modifyvm", :id, "--memory", "4096"]
+    vb.customize ["modifyvm", :id, "--memory", "8192"]
     vb.customize ["modifyvm", :id, "--cpus", "2"]
   end
 
+  portSSH = 2224
   portWeb = 8080
+  portWebSSL = 8443
+  portDocHubSSL = 8043
+  portWebGitlab = 8090
   portPlantUML = 8079
   portDB = 27017
   docker_compose_version ="2.9.0"
 
+  config.vm.network(:forwarded_port, guest: portSSH, host: portSSH)
+  config.vm.network(:forwarded_port, guest: portWebSSL, host: portWebSSL)
+  config.vm.network(:forwarded_port, guest: portDocHubSSL, host: portDocHubSSL)
+  config.vm.network(:forwarded_port, guest: portWebGitlab, host: portWebGitlab)
   config.vm.network(:forwarded_port, guest: portWeb, host: portWeb)
   config.vm.network(:forwarded_port, guest: portPlantUML, host: portPlantUML)
   config.vm.network(:forwarded_port, guest: portDB, host: portDB)
   #config.vm.network :forwarded_port, guest: 22, host: 2200, id: 'ssh'
   #config.ssh.port = 2200
+
+  config.vm.hostname = "vagrant-dochub"
+  config.vm.network "private_network", ip: "192.168.44.6"
   
   config.vm.provision :shell, inline: "apt-get update"
   config.vm.provision :shell, inline: "export DOCKER_BUILDKIT=1" # or configure in daemon.json

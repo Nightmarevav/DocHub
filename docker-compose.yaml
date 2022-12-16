@@ -15,6 +15,7 @@ services:
       - .env
     ports:
       - "8080:8080"
+      - "8043:8043"
     volumes:
       - "/vagrant/public/workspace:/usr/share/nginx/html/workspace/"
 
@@ -22,4 +23,59 @@ services:
     image: ghcr.io/rabotaru/dochub/plantuml:v0.0.2
     container_name: plantuml
     ports:
-      - "8079:8080"
+      - "8079:8080"    
+  gitlab:
+   container_name: gitlab
+   image: 'gitlab/gitlab-ce:latest'
+   restart: always
+   hostname: 'vagrant-dochub'
+   environment:
+     GITLAB_OMNIBUS_CONFIG: |
+       external_url 'https://vagrant-dochub:8443'
+       gitlab_rails['gitlab_shell_ssh_port'] = 2224
+       gitlab_rails['lfs_enabled'] = true
+       #nginx
+       letsencrypt['enable'] = false
+       nginx['listen_port'] = 8443
+       nginx['redirect_http_to_https'] = true
+       nginx['ssl_certificate'] = "/etc/gitlab/ssl/vagrant-dochub.crt"
+       nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/vagrant-dochub.key"
+       nginx['ssl_protocols'] = "TLSv1.1 TLSv1.2"
+       nginx['logrotate_frequency'] = "weekly"
+       nginx['logrotate_rotate'] = 52
+       nginx['logrotate_compress'] = "compress"
+       nginx['logrotate_method'] = "copytruncate"
+       nginx['logrotate_delaycompress'] = "delaycompress"
+       # Add any other gitlab.rb configuration options if desired 
+      #  gitlab_rails['smtp_enable'] = true
+      #  gitlab_rails['smtp_address'] = "<b>SMTP_SERVER</b>"
+      #  gitlab_rails['smtp_user_name'] = "<b>SMTP_SERVER_USERNAME</b>"
+      #  gitlab_rails['smtp_password'] = "<b>SMTP_SERVER_PASSWORD</b>"
+      #  gitlab_rails['smtp_domain'] = "<b>DOMAIN</b>"
+      #  gitlab_rails['smtp_enable_starttls_auto'] = true
+      #  gitlab_rails['smtp_port'] = 587
+      #  gitlab_rails['smtp_authentication'] = "login"
+      #  gitlab_rails['gitlab_email_from'] = '<b>FROM_EMAIL</b>'
+      #  gitlab_rails['gitlab_email_reply_to'] = '<b>REPLY_EMAIL</b>'
+      #  # Add any other gitlab.rb configuration here, each on its own line
+   ports:
+     - '8090:8090'
+     - '8443:8443'
+     - '2224:22'
+   volumes:
+     - '/opt/gitlab/config:/etc/gitlab'
+     - '/vagrant/ssl:/etc/gitlab/ssl'
+     - '/opt/gitlab/logs:/var/log/gitlab'
+     - '/opt/gitlab/data:/var/opt/gitlab'
+   shm_size: '256m'  
+
+  # gitlab-runner:
+  #  container_name: gitlab-runner
+  #  image: gitlab/gitlab-runner:latest
+  #  restart: always
+  #  volumes:
+  #    - '/opt/gitlab-runner/data:/home/gitlab_ci_multi_runner/data'
+  #    - '/opt/gitlab-runner/config:/etc/gitlab-runner'
+  #    - '/var/run/docker.sock:/var/run/docker.sock:rw'
+  #  environment:
+  #    - CI_SERVER_URL=http://localhost/ci
