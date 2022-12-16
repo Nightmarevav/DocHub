@@ -38,12 +38,12 @@ Vagrant.configure("2") do |config|
 
  
   #install docker
-  #config.vm.provision :shell, inline: "sudo curl -fsSL https://get.docker.com -o get-docker.sh"
-  #config.vm.provision :shell, inline: "sudo DRY_RUN=1 sh ./get-docker.sh"
+  config.vm.provision :shell, inline: "sudo curl -fsSL https://get.docker.com -o get-docker.sh"
+  config.vm.provision :shell, inline: "sudo DRY_RUN=1 sh ./get-docker.sh"
   
   #install docker-compose
-  #config.vm.provision :shell, inline: "sudo curl -SL \"https://github.com/docker/compose/releases/download/v2.9.0/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose"
-  #config.vm.provision :shell, inline: "sudo chmod +x /usr/local/bin/docker-compose"
+  config.vm.provision :shell, inline: "sudo curl -SL \"https://github.com/docker/compose/releases/download/v2.9.0/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose"
+  config.vm.provision :shell, inline: "sudo chmod +x /usr/local/bin/docker-compose"
 
   
   #install docker-compose

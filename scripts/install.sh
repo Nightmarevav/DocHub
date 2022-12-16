@@ -2,7 +2,7 @@
 #install/update docker engine ubuntu
 
 #remove old installation
-sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get remove docker docker-engine docker.io containerd runc docker-compose
 
 #update repo
 sudo apt-get update
@@ -34,6 +34,12 @@ sudo apt-get install docker-ce=$VERSION_STRING docker-ce-cli=$VERSION_STRING con
 #Set right for no-root
 sudo groupadd docker
 sudo usermod -aG docker $USER
+su -s ${USER}
+
+#install docker-compose
+#VERSION_STRING =v2.14.1
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.14.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
 #Test 
 sudo docker run hello-world
